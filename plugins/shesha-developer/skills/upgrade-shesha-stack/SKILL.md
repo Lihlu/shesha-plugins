@@ -1,6 +1,6 @@
 ---
 name: upgrade-shesha-stack
-description: Upgrades Shesha framework dependencies in both frontend and backend projects to a specified version. Handles monorepo and standard project structures. Use when user wants to upgrade, update, or migrate Shesha stack versions.
+description: Upgrades Shesha framework dependencies in both frontend and backend projects to a specified version. Handles monorepo and standard project structures. Use when user wants to upgrade, update, or migrate Shesha versions.
 ---
 
 # Upgrade Shesha Stack
@@ -11,15 +11,16 @@ Upgrade Shesha framework dependencies to a specified version across frontend (Re
 
 This skill performs a coordinated upgrade of Shesha dependencies across your entire stack:
 
-1. **Ask for target version** using AskUserQuestion
-2. **Upgrade frontend** packages in `/adminportal` folder
+1. **Ask for target Shesha version** using AskUserQuestion
+2. **Upgrade frontend** packages in `/adminportal` folder (including `@shesha-io/enterprise`)
 3. **Upgrade backend** packages in `/backend` folder
 4. **Verify and report** all changes made
 
 ### Key Rules
 
 - Always ask user for target Shesha version before proceeding
-- Frontend: Update `@shesha-io/reactjs` first, then other `@shesha-io/*` packages
+- Use the same version for both frontend and backend
+- Frontend: Update `@shesha-io/enterprise` first, then other `@shesha-io/*` packages
 - Backend: Only modify `directory.build.props`, never individual `.csproj` files
 - Handle both monorepo (with `packages/` subfolder) and standard structures
 - Check for package-lock.json or yarn.lock to determine package manager
@@ -27,14 +28,16 @@ This skill performs a coordinated upgrade of Shesha dependencies across your ent
 
 ## Workflow
 
-### Step 1: Ask for Target Version
+### Step 1: Ask for Target Shesha Version
 
 Use `AskUserQuestion` to get the desired Shesha version:
 
 ```
 What Shesha version would you like to upgrade to?
-Example: 0.43.3
+Example: 3.1.0, 3.2.0, etc.
 ```
+
+This version will be applied to both frontend and backend.
 
 ### Step 2: Upgrade Frontend Dependencies
 
@@ -44,13 +47,14 @@ Example: 0.43.3
    - Main: `adminportal/package.json`
    - Subprojects: `adminportal/packages/*/package.json` (if exists)
 
-2. **Update `@shesha-io/reactjs`:**
-   - Set to the exact target version specified by user
-   - Example: `"@shesha-io/reactjs": "0.43.3"`
+2. **Update `@shesha-io/enterprise`:**
+   - Set to the target Shesha version from Step 1
+   - Example: `"@shesha-io/enterprise": "3.1.0"`
+   - **Note:** `@shesha-io/enterprise` is the main package for Shesha projects
 
 3. **Update other `@shesha-io/*` packages:**
    - Find all dependencies starting with `@shesha-io/`
-   - Update to latest compatible versions that support the target `@shesha-io/reactjs` version
+   - Update to the same target version or compatible versions
    - Check npm registry or use `npm view @shesha-io/{package} peerDependencies` if needed
 
 4. **Determine package manager:**
@@ -64,7 +68,8 @@ Example: 0.43.3
    - pnpm: `pnpm install`
 
 **Packages to update (typical list):**
-- `@shesha-io/reactjs` (main framework)
+- `@shesha-io/enterprise` (main enterprise framework)
+- `@shesha-io/reactjs` (if present, update to compatible version)
 - `@shesha-io/pd-publicholidays`
 - `@shesha-io/pd-core`
 - Any other `@shesha-io/*` packages found
@@ -76,25 +81,25 @@ Example: 0.43.3
 1. **Find directory.build.props:**
    - Path: `backend/directory.build.props`
    - This file contains centralized version management for all NuGet packages
+   - Reference: See `plugins/shesha-developer/skills/create-module/reference/ProjectFiles.md` for structure
 
 2. **Update Shesha version property:**
    - Look for property like `<SheshaVersion>X.X.X</SheshaVersion>`
-   - Update to target version
-   - Example: `<SheshaVersion>0.43.3</SheshaVersion>`
+   - Update to the same target Shesha version from Step 1
+   - Example: `<SheshaVersion>3.1.0</SheshaVersion>`
 
 3. **Update Shesha and Boxfusion package references:**
-   - Find all `<PackageReference>` elements with `Include` starting with:
+   - Find all `<PackageReference>` elements with `Include` or `Update` starting with:
      - `Shesha.*`
      - `Boxfusion.*`
-   - Update their `Version` attribute to match target version or latest compatible
+   - Ensure they reference `$(SheshaVersion)` variable
    - **IMPORTANT:** Only modify versions in `directory.build.props`, NOT in `.csproj` files
 
 4. **Common packages to update:**
-   - `Shesha.Core`
-   - `Shesha.Framework`
-   - `Shesha.NHibernate`
-   - `Shesha.Application`
-   - `Shesha.Web.ForMvc`
+   - `Shesha.Application` Version="$(SheshaVersion)"
+   - `Shesha.Core` Version="$(SheshaVersion)"
+   - `Shesha.Framework` Version="$(SheshaVersion)"
+   - `Shesha.NHibernate` Version="$(SheshaVersion)"
    - `Boxfusion.*` packages (if present)
 
 **Example directory.build.props structure:**
@@ -102,10 +107,11 @@ Example: 0.43.3
 ```xml
 <Project>
   <PropertyGroup>
-    <SheshaVersion>0.43.3</SheshaVersion>
+    <SheshaVersion>3.1.0</SheshaVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Update="Shesha.Application" Version="$(SheshaVersion)" />
     <PackageReference Update="Shesha.Core" Version="$(SheshaVersion)" />
     <PackageReference Update="Shesha.Framework" Version="$(SheshaVersion)" />
     <PackageReference Update="Shesha.NHibernate" Version="$(SheshaVersion)" />
@@ -123,13 +129,14 @@ After making changes:
 
 2. **Show version changes:**
    - Before → After for each package
-   - Format: `@shesha-io/reactjs: 0.42.0 → 0.43.3`
+   - Format: `@shesha-io/enterprise: 0.42.0 → 3.1.0`
+   - Show the Shesha version used for both frontend and backend
 
 3. **Recommend next steps:**
    - Run `npm install` (if not already run)
    - Run `dotnet restore` in backend
    - Test the application
-   - Review breaking changes in release notes
+   - Review breaking changes in Shesha release notes
 
 ## Quick Reference
 
@@ -137,14 +144,14 @@ After making changes:
 
 | File | Purpose | Pattern |
 |------|---------|---------|
-| `adminportal/package.json` | Main frontend dependencies | `@shesha-io/*` packages |
+| `adminportal/package.json` | Main frontend dependencies | `@shesha-io/*` packages, especially `@shesha-io/enterprise` |
 | `adminportal/packages/*/package.json` | Monorepo subprojects | `@shesha-io/*` packages |
 
 ### Backend Files to Update
 
 | File | Purpose | Pattern |
 |------|---------|---------|
-| `backend/directory.build.props` | Centralized NuGet versions | `Shesha.*`, `Boxfusion.*` |
+| `backend/directory.build.props` | Centralized NuGet versions | `Shesha.*`, `Boxfusion.*` with `$(SheshaVersion)` |
 
 ### Version Property Patterns
 
@@ -152,8 +159,9 @@ After making changes:
 ```json
 {
   "dependencies": {
-    "@shesha-io/reactjs": "0.43.3",
-    "@shesha-io/pd-publicholidays": "^0.43.0"
+    "@shesha-io/enterprise": "3.1.0",
+    "@shesha-io/reactjs": "3.1.0",
+    "@shesha-io/pd-publicholidays": "^3.1.0"
   }
 }
 ```
@@ -161,19 +169,24 @@ After making changes:
 **Backend (directory.build.props):**
 ```xml
 <PropertyGroup>
-  <SheshaVersion>0.43.3</SheshaVersion>
+  <SheshaVersion>3.1.0</SheshaVersion>
 </PropertyGroup>
 <ItemGroup>
+  <PackageReference Update="Shesha.Application" Version="$(SheshaVersion)" />
   <PackageReference Update="Shesha.Core" Version="$(SheshaVersion)" />
+  <PackageReference Update="Shesha.Framework" Version="$(SheshaVersion)" />
+  <PackageReference Update="Shesha.NHibernate" Version="$(SheshaVersion)" />
 </ItemGroup>
 ```
+
+**Note:** Both frontend and backend use the same Shesha version (e.g., 3.1.0).
 
 ## Safety Checks
 
 Before proceeding:
 - [ ] Backup current versions (or ensure git is clean)
-- [ ] Verify target version exists on npm and NuGet
-- [ ] Check for breaking changes in release notes
+- [ ] Verify target Shesha version exists on npm and NuGet
+- [ ] Check for breaking changes in Shesha release notes
 - [ ] Ensure no uncommitted changes (recommend `git status`)
 
 After upgrading:
@@ -181,8 +194,14 @@ After upgrading:
 - [ ] Run `dotnet restore` in backend
 - [ ] Check for compilation errors
 - [ ] Run tests if available
+- [ ] Verify `@shesha-io/enterprise` is properly installed
 
 ## Error Handling
+
+**If version not found on npm or NuGet:**
+- Inform user that the version doesn't exist
+- Ask user to confirm the correct version number
+- Check available versions: `npm view @shesha-io/enterprise versions` or NuGet package page
 
 **If package.json not found:**
 - Verify `/adminportal` path exists
@@ -200,12 +219,19 @@ After upgrading:
 
 ## Example Usage
 
-**User request:** "Upgrade Shesha to version 0.43.3"
+**User request:** "Upgrade to Shesha version 3.1.0"
 
 **Workflow:**
-1. Ask: "Confirm upgrade to Shesha 0.43.3?"
-2. Update `adminportal/package.json`: `@shesha-io/reactjs: "0.43.3"`
-3. Update `backend/directory.build.props`: `<SheshaVersion>0.43.3</SheshaVersion>`
-4. Report changes and recommend testing
+1. Ask: "Confirm upgrade to Shesha version 3.1.0?"
+2. Update `adminportal/package.json`: `@shesha-io/enterprise: "3.1.0"`
+3. Update other `@shesha-io/*` packages to compatible versions
+4. Update `backend/directory.build.props`: `<SheshaVersion>3.1.0</SheshaVersion>`
+5. Report changes and recommend testing
+
+## Important Notes
+
+- The same version is used for both frontend (`@shesha-io/enterprise`) and backend (`SheshaVersion`)
+- This ensures consistency across the entire stack
+- Always verify the version exists on both npm and NuGet before upgrading
 
 Now perform the upgrade based on user's requirements.

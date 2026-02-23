@@ -60,6 +60,17 @@ namespace MyNamespace.Migrations
 ## Domain to DB Object Naming Mappings
 When creating database migrations, use the following naming conventions to ensure that database objects correctly correspond to your domain model:
 
+**CRITICAL: Always Check the Module's Table Prefix First**
+Before creating any migration, you MUST check the module's configured table prefix:
+1. **Read the AssemblyInfo.cs file** in the Domain project's Properties folder
+2. Look for: `[assembly: TablePrefix("PREFIX_")]`
+3. **Use this exact prefix** for all new tables and columns on inherited entities
+
+Example: If AssemblyInfo.cs contains `[assembly: TablePrefix("LB_")]`, then:
+- ✅ Correct: `Create.Table("LB_ElectronicApprovals")`
+- ❌ Wrong: `Create.Table("Crm_ElectronicApprovals")`
+- ❌ Wrong: `Create.Table("ElectronicApprovals")`
+
 **Entity to Table:**
 - New entity → Table name = [ModuleDBPrefix]_[PluralizedEntityName]
 - Inherited entity → No new table; map to base entity's table
@@ -72,8 +83,47 @@ When creating database migrations, use the following naming conventions to ensur
 - Property added to inherited entity → Column name = [ModuleDBPrefix]_[PropertyName]
 
 **Module DB Prefix:**
-All tables/columns for a module must use its prefix (e.g., MyApp_, Core_, Frwk_)
-Set prefix in AssemblyInfo.cs with [assembly: TablePrefix("MyApp_")]
+All tables/columns for a module must use its prefix (e.g., LB_, Core_, Frwk_)
+The prefix is defined in AssemblyInfo.cs with [assembly: TablePrefix("PREFIX_")]
+
+**Common Prefixes:**
+- `Core_` - Shesha.Core framework tables (Person, Organisation, Account, OtpAuditItem)
+- `LB_` - LandBank.Crm module tables (example)
+- `MyApp_` - Your custom module tables
+
+**Practical Workflow for Finding the Correct Prefix:**
+
+1. Read the Domain project's `Properties/AssemblyInfo.cs` file
+2. Find the line: `[assembly: TablePrefix("PREFIX_")]`
+3. Use that exact prefix in your migrations
+
+<example>
+
+**Step 1: Check AssemblyInfo.cs**
+```csharp
+// File: src/MyCompany.MyApp.Domain/Properties/AssemblyInfo.cs
+using Shesha.Domain.Attributes;
+
+[assembly: TablePrefix("LB_")]  // ← This is the prefix to use!
+```
+
+**Step 2: Use the prefix in migrations**
+```csharp
+// ✅ CORRECT - Uses LB_ prefix from AssemblyInfo.cs
+Create.Table("LB_ElectronicApprovals")
+    .WithIdAsGuid()
+    .WithFullAuditColumns();
+
+// ❌ WRONG - Using wrong prefix
+Create.Table("Crm_ElectronicApprovals")  // Don't guess!
+    .WithIdAsGuid();
+
+// ❌ WRONG - Missing prefix entirely
+Create.Table("ElectronicApprovals")  // Prefix is required!
+    .WithIdAsGuid();
+```
+
+</example>
 
 ## Creating Tables
 

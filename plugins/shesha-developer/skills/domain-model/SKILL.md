@@ -1,6 +1,6 @@
 ---
 name: domain-model
-description: Creates and modifies domain entities, reference lists, and database migrations in Shesha framework .NET applications. Use when creating new entities, updating entity properties or relationships, managing reference lists (code-based and data-based), or generating FluentMigrator database migrations.
+description: Creates and modifies domain entities, reference lists, and database migrations in Shesha framework .NET applications. IMPORTANT — This skill MUST be invoked BEFORE any manual exploration or planning when the task involves creating, modifying, or implementing domain entities, entity properties, relationships, reference lists, or database migrations. Use when the user asks to create, scaffold, implement, or update the domain layer, domain model, entities, reference lists, or migrations in a Shesha project. Also use when implementing features from a PRD, specification, or API design that require new or modified entities or database schema changes.
 ---
 
 # Shesha Domain Model Manager
@@ -16,7 +16,9 @@ description: Creates and modifies domain entities, reference lists, and database
 
 ## Key Rules
 
-**Framework-First**: Always leverage Shesha's built-in capabilities before implementing custom solutions. Use existing entities (`Person`, `Organisation`, `Account`, `Address`, etc.) and the framework's metadata-driven approach. Check manifests before creating new entities.
+**Framework-First**: Always leverage Shesha's built-in capabilities before implementing custom solutions. Use existing entities (`Person`, `Organisation`, `Account`, `Address`, `StoredFile`, `OtpAuditItem`, etc.) and the framework's metadata-driven approach. Check manifests before creating new entities.
+
+**Use Framework File Management**: The Shesha framework provides built-in file management via `StoredFile`, `StoredFileVersion`, `IStoredFileService`, and `StoredFileController`. Do NOT create custom file entities, upload/download endpoints, or file storage logic. See [reference/DomainModelling.md](reference/DomainModelling.md) § File and Document Management for patterns and details.
 
 **MANDATORY: Database Migrations for Every Domain Change**
 Whenever making changes to domain model entity classes — whether creating new entities, adding/removing/renaming properties, changing relationships, or updating reference lists — you MUST ALWAYS create the corresponding database migration classes. No domain model change is complete without its migration.
@@ -41,7 +43,7 @@ The `reference/manifests/` folder contains JSON manifest files documenting all a
 ### Loading and Using Manifests
 
 When creating new entities, first check the relevant manifests to:
-1. **Identify reusable entities** - Extend existing entities like `Person`, `Organisation`, `Account` instead of creating new ones
+1. **Identify reusable entities** - Extend existing entities like `Person`, `Organisation`, `Account`, `OtpAuditItem` instead of creating new ones
 2. **Find correct base classes** - Use appropriate base classes from Shesha.Core
 3. **Reference existing entities** - Link to existing entities in relationships
 4. **Reuse reference lists** - Use existing enums/reference lists where applicable
@@ -87,6 +89,7 @@ Each manifest file follows this structure:
 | Manifest | Purpose | Key Entities |
 |----------|---------|--------------|
 | `shesha-core-manifest.json` | Core Shesha entities | Person, Organisation, Account, Address, Site, Notification |
+| `shesha-otp-manifest.json` | OTP/2FA verification | OtpAuditItem, RefListOtpSendType, RefListOtpSendStatus |
 | `shesha-enterprise-domain-manifest.json` | Enterprise business entities | FinancialAccount, Order, Invoice, Product, Employee, Contract |
 | `shesha-crm-domain-manifest.json` | CRM domain entities | Contact, Lead, Opportunity, Campaign, Territory |
 | `boxfusion-service-management-manifest.json` | Service/Case management | Case, CaseInteraction, SlaPolicy, Article |
@@ -116,6 +119,26 @@ public class MyEntity : FullAuditedEntity<Guid>
 }
 ```
 
+**Example: Referencing OTP audit trail**
+```csharp
+// From shesha-otp-manifest.json, OtpAuditItem is in Shesha.Domain namespace
+using Shesha.Domain;
+using Shesha.Domain.Enums;
+
+public class ConsentApproval : FullAuditedEntity<Guid>
+{
+    /// <summary>
+    /// Link to the OTP verification used for consent approval
+    /// </summary>
+    public virtual OtpAuditItem OtpVerification { get; set; }
+
+    /// <summary>
+    /// Type of channel used for OTP delivery
+    /// </summary>
+    public virtual RefListOtpSendType VerificationChannel { get; set; }
+}
+```
+
 ## MANDATORY: Test After Every Domain Model Change
 
 After completing any domain model change **and** creating the corresponding database migrations, you **MUST ALWAYS** run the `test-entity-crud-api` skill to verify that the changes work correctly.
@@ -131,6 +154,7 @@ Determine the type of change, then follow the appropriate path:
 
 ```
 - [ ] Check manifests for reusable entities and reference lists
+- [ ] For file/document properties, use StoredFile (direct property or Owner pattern) — do NOT create custom file entities
 - [ ] Create entity class with correct base class, attributes, and properties
 - [ ] Create enum-based reference lists if needed (no migration required for these)
 - [ ] Create data-based reference list migrations if needed

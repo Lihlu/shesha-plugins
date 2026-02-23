@@ -29,7 +29,9 @@ The easiest way to install Shesha Plugins is through the Claude plugin marketpla
    ```
 
 2. **Open the marketplace**
-   - Type `marketplace` in Claude terminal
+   - Run: /plugin enter
+
+   - Use the arrow keys to navigate to the Marketplace tab
 
 3. **Navigate to Shesha Plugins**
    - Scroll down or search for "Shesha Plugins"

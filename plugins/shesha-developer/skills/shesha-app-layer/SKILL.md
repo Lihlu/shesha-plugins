@@ -1,6 +1,6 @@
 ---
 name: shesha-app-layer
-description: Generates Shesha application layer code artifacts for .NET applications using ABP framework with NHibernate. Creates application services, DTOs, AutoMapper profiles, domain entities, modules, and scheduled jobs. Use when the user asks to create, scaffold, or update application services, entities, DTOs, jobs, or modules in a Shesha project.
+description: Generates Shesha application layer code artifacts for .NET applications using ABP framework with NHibernate. Creates application services, DTOs, AutoMapper profiles, domain entities, modules, and scheduled jobs. IMPORTANT — This skill MUST be invoked BEFORE any manual exploration or planning when the task involves creating or modifying Shesha application services, DTOs, or AutoMapper profiles. Use when the user asks to create, scaffold, implement, or update the application layer, application services, entities, DTOs, jobs, or modules in a Shesha project. Also use when the user references a PRD, specification, or API design for backend implementation.
 ---
 
 # Shesha Application Layer Code Generation
@@ -71,6 +71,13 @@ Generate application layer artifacts for a Shesha/.NET/ABP/NHibernate applicatio
 | `[ScheduledJob("guid", ...)]` | Scheduled jobs |
 
 ### Common patterns
+
+**File management — use framework capabilities, do NOT create custom endpoints:**
+- For single file properties on entities, use `StoredFile` with `[StoredFile]` attribute — upload/download handled by the framework's `StoredFileController`.
+- For file attachment lists, use the framework's Owner pattern (`StoredFile.Owner`) — no collection property needed on the entity.
+- To work with files in services, inject `IStoredFileService` — provides `CreateFileAsync`, `GetStreamAsync`, `GetAttachmentsAsync`, `DeleteAsync`, and more.
+- Do NOT create custom upload/download controllers, file storage logic, or file metadata entities.
+- See [services-and-dtos.md](services-and-dtos.md) § File Management for service-layer patterns.
 
 **Validation:**
 ```csharp

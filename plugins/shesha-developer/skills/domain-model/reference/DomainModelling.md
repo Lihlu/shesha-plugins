@@ -141,6 +141,133 @@ Child entities belonging to an aggregate should:
 Because it is such a common requirement to allow attachments and notes to be associated with any entity, the Shesha framework supports this out of the box.
 As such it is NOT necessary to add `IList<StoredFile>` or `IList<Note>` or similar collections to any entity to indicate that attachments or notes may be added to a specific entity.
 
+### File and Document Management
+
+The Shesha framework provides comprehensive built-in file management through the `StoredFile` entity, `StoredFileVersion` entity, `IStoredFileService`, and `StoredFileController`. **You MUST leverage these framework capabilities** instead of implementing custom file storage, upload/download endpoints, or file tracking entities.
+
+#### Why Use the Framework's File Management
+
+- **Storage-agnostic**: Automatically works with whatever storage backend is configured (local filesystem, Azure Blob Storage, etc.) — no code changes needed when switching.
+- **Versioning and audit trails**: Built-in support for file version history and full audit logging (created/modified by/when).
+- **Thumbnail generation**: Built-in endpoint for generating image thumbnails with configurable fit options.
+- **UI integration**: Native support on Shesha forms through `File` and `FileList` components that bind directly to `StoredFile` entity properties.
+- **Download tracking**: Built-in tracking of which users have downloaded which file versions.
+- **Multi-tenant isolation**: Automatic tenant isolation on all file entities.
+- **Soft delete**: Full soft-delete support with the ability to restore.
+
+#### Pattern 1: Single File Property (Direct Reference)
+
+When an entity needs a single associated file (e.g. a profile photo, a signed document), add a `StoredFile` property directly on the entity and decorate it with the `[StoredFile]` attribute.
+
+```csharp
+using Shesha.Domain;
+using Shesha.Domain.Attributes;
+
+public class Employee : FullAuditedEntity<Guid>
+{
+    [StoredFile(IsVersionControlled = true)]
+    public virtual StoredFile Photo { get; set; }
+
+    [StoredFile]
+    public virtual StoredFile SignedContract { get; set; }
+}
+```
+
+The `[StoredFile]` attribute accepts the following parameters:
+
+| Parameter | Description |
+| --- | --- |
+| `IsVersionControlled` | If `true`, full version history is maintained. If `false` (default), only the current version is kept. |
+| `IsEncrypted` | If `true`, the file content is stored encrypted. |
+| `Accept` | MIME type restrictions (e.g. `"image/*"`, `"application/pdf"`). |
+
+The framework's `StoredFileController` Upload and CreateOrUpdate endpoints handle uploading to these properties automatically — the caller specifies the `ownerType`, `ownerId`, and `propertyName` and the framework resolves the property, creates/updates the `StoredFile`, and persists the content.
+
+**Database migration for a StoredFile property:**
+
+```csharp
+// StoredFile is a separate entity — add a foreign key column
+Create.Column("PhotoId").OnTable("MyModule_Employees").AsGuid().Nullable()
+    .ForeignKey("FK_MyModule_Employees_PhotoId", "frwk.stored_files", "Id");
+```
+
+#### Pattern 2: Multiple File Attachments (Owner-Based)
+
+When an entity needs a list of file attachments (e.g. supporting documents on an application, photos on an inspection), use the framework's **Owner** pattern. No collection property is needed on the entity.
+
+The `StoredFile` entity has an `Owner` property (`GenericEntityReference`) that links any file to any entity via `OwnerType` (the entity's full class name) and `OwnerId` (the entity's ID). Files can optionally be organized into categories via the `Category` property.
+
+**No entity changes required** — simply use the existing `StoredFileController` endpoints:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `PUT /api/StoredFile` | Upload/create a file linked to an owner entity |
+| `POST /api/StoredFile/Upload` | Upload a file as an attachment to an owner |
+| `GET /api/StoredFile/FilesList` | Get all files attached to an entity (optionally filtered by category) |
+| `GET /api/StoredFile/Download` | Download a file by ID |
+| `GET /api/StoredFile/DownloadZip` | Download all attachments for an entity as a zip archive |
+| `GET /api/StoredFile/DownloadThumbnail` | Download a resized thumbnail of an image file |
+| `DELETE /api/StoredFile` | Delete a file by ID |
+| `DELETE /api/StoredFile/Delete` | Delete a file by owner reference |
+| `POST /api/StoredFile/UploadNewVersion` | Upload a new version of an existing file |
+| `GET /api/StoredFile/StoredFile/{fileId}/Versions` | Get version history for a file |
+
+**Using categories to organize attachments:**
+
+```csharp
+// No changes to the entity — files are linked via Owner and categorized
+// The frontend FileList component handles category-based grouping automatically
+
+// In a service, query attachments by category using IStoredFileService:
+var supportingDocs = await _storedFileService.GetAttachmentsOfCategoryAsync(
+    entity.Id, entity.GetType().StripCastleProxyType().GetRequiredFullName(), "supportingDocuments");
+```
+
+#### Pattern 3: Child Entity Referencing StoredFile
+
+When you need additional metadata about a file beyond what `StoredFile` provides (e.g. a specific relationship context), create a child entity that references `StoredFile` rather than duplicating file storage:
+
+```csharp
+// From Shesha.Core — NotificationMessageAttachment references StoredFile
+public class NotificationMessageAttachment : FullAuditedEntity<Guid>
+{
+    /// <summary>
+    /// Name override for the file
+    /// </summary>
+    [MaxLength(300)]
+    public virtual string FileName { get; set; }
+
+    /// <summary>
+    /// Reference to the stored file (managed by the framework)
+    /// </summary>
+    public virtual StoredFile File { get; set; }
+
+    /// <summary>
+    /// Parent message this attachment belongs to
+    /// </summary>
+    public virtual NotificationMessage Message { get; set; }
+}
+```
+
+#### What NOT to Do
+
+- **Do NOT** create custom entities to store file metadata (file name, file size, file type, upload date, etc.) — `StoredFile` and `StoredFileVersion` already track all of this.
+- **Do NOT** create custom upload/download API endpoints — use the framework's `StoredFileController`.
+- **Do NOT** add `IList<StoredFile>` collection properties to entities — use the Owner-based pattern instead.
+- **Do NOT** implement custom file storage logic (writing to disk, Azure blobs, etc.) — `IStoredFileService` handles this based on configuration.
+- **Do NOT** implement custom file versioning — set `IsVersionControlled = true` on the `StoredFile` and use `UploadNewVersion`.
+- **Do NOT** implement custom thumbnail generation — use the `DownloadThumbnail` endpoint.
+
+#### When Custom File Handling Is Acceptable
+
+Custom file management should **only** be implemented if the framework's capabilities genuinely cannot support the use case, such as:
+
+- Integrating with an external document management system (e.g. SharePoint, Google Drive) that requires its own API.
+- Processing files in a format or workflow not supported by the framework (e.g. real-time streaming, chunk-based uploads for very large files).
+- Bulk file import/export with custom transformation logic.
+
+Even in these cases, consider storing the resulting files back into `StoredFile` for consistency and UI integration.
+
 ### Sample Entity Class
 
 The sample below illustrates a typical entity class following the guidelines.

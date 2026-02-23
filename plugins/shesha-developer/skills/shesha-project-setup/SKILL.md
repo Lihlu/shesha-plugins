@@ -215,6 +215,17 @@ And:
 - Test username and passwords for the backend can be found in `.sheshadev.local.json` in the project root. This file is excluded from version control.
 ```
 
+And under "Skill Usage Rules" or similar:
+
+```markdown
+## Skill Usage Rules
+
+- **Before implementing backend application services, DTOs, AutoMapper profiles, or the application layer**, always invoke the `shesha-developer:shesha-app-layer` skill first. It contains Shesha-specific patterns, base classes, and templates that must be followed.
+- **Before creating or modifying domain entities, reference lists, or migrations**, always invoke the `shesha-developer:domain-model` skill first.
+- **Before creating or modifying workflow artifacts**, always invoke the `shesha-developer:shesha-workflow` skill first.
+- These skills must be invoked BEFORE any manual exploration or planning for the relevant task.
+```
+
 ### 6.2 Add standard analyzers
 
 Run the analyzer setup script:

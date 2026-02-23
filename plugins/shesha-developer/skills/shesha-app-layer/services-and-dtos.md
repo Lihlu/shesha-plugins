@@ -166,3 +166,117 @@ namespace {ModuleNamespace}.Application.Services.{EntityNamePlural}
 - Inherit `ShaProfile`
 - `.ForMember(dest => dest.X, opt => opt.Ignore())` for navigation properties
 - Module's `Initialize()` auto-scans profiles via `cfg.AddMaps(thisAssembly)`
+
+---
+
+## §4. File Management in Services
+
+The Shesha framework provides built-in file management. **Do NOT create custom file upload/download endpoints or file storage logic.** Use the framework's `StoredFileController` for all upload/download operations and `IStoredFileService` when you need to work with files programmatically within services.
+
+### When to Use `IStoredFileService` in a Service
+
+Only inject `IStoredFileService` when your service needs to programmatically create, read, copy, or delete files as part of business logic (e.g. generating a report file, copying attachments between entities, processing uploaded content). For standard upload/download from the UI, the framework's `StoredFileController` handles everything automatically.
+
+### Using `IStoredFileService`
+
+```csharp
+using Shesha.Services;
+using Shesha.Domain;
+
+public class InvoiceAppService : SheshaAppServiceBase
+{
+    private readonly IRepository<Invoice, Guid> _invoiceRepository;
+    private readonly IStoredFileService _storedFileService;
+
+    public InvoiceAppService(
+        IRepository<Invoice, Guid> invoiceRepository,
+        IStoredFileService storedFileService)
+    {
+        _invoiceRepository = invoiceRepository;
+        _storedFileService = storedFileService;
+    }
+
+    /// <summary>
+    /// Example: Programmatically create a file and attach it to an entity
+    /// </summary>
+    [HttpPost]
+    public async Task GenerateReportAsync(Guid invoiceId)
+    {
+        var invoice = await _invoiceRepository.GetAsync(invoiceId);
+
+        // Generate report content (e.g. PDF bytes)
+        var reportBytes = GeneratePdfReport(invoice);
+        using var stream = new MemoryStream(reportBytes);
+
+        // Create a StoredFile attached to the invoice via the Owner pattern
+        var fileVersion = await _storedFileService.CreateFileAsync(stream, "InvoiceReport.pdf", file =>
+        {
+            file.SetOwner(invoice);
+            file.Category = "reports";
+        });
+    }
+
+    /// <summary>
+    /// Example: Read an existing file's content
+    /// </summary>
+    [HttpGet]
+    public async Task<byte[]> GetReportContentAsync(Guid fileId)
+    {
+        var file = await _storedFileService.GetOrNullAsync(fileId);
+        if (file == null)
+            throw new UserFriendlyException("File not found");
+
+        using var stream = await _storedFileService.GetStreamAsync(file);
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+        return memoryStream.ToArray();
+    }
+
+    /// <summary>
+    /// Example: Copy all attachments from one entity to another
+    /// </summary>
+    [HttpPost]
+    public async Task CloneAttachmentsAsync(Guid sourceInvoiceId, Guid targetInvoiceId)
+    {
+        var source = await _invoiceRepository.GetAsync(sourceInvoiceId);
+        var target = await _invoiceRepository.GetAsync(targetInvoiceId);
+        await _storedFileService.CopyAttachmentsToAsync(source, target);
+    }
+
+    /// <summary>
+    /// Example: Query attachments by category
+    /// </summary>
+    [HttpGet]
+    public async Task<List<string>> GetAttachmentNamesAsync(Guid invoiceId)
+    {
+        var invoice = await _invoiceRepository.GetAsync(invoiceId);
+        var attachments = await _storedFileService.GetAttachmentsOfCategoryAsync(
+            invoice, "supportingDocuments");
+        return attachments.Select(a => a.FileName).ToList();
+    }
+}
+```
+
+### Key `IStoredFileService` Methods
+
+| Method | Purpose |
+| --- | --- |
+| `CreateFileAsync(Stream, fileName, Action<StoredFile>?)` | Create a new file with content |
+| `GetStreamAsync(StoredFile)` | Download latest version content |
+| `GetStreamAsync(StoredFileVersion)` | Download specific version content |
+| `GetOrNullAsync(Guid)` | Retrieve file by ID |
+| `DeleteAsync(StoredFile)` | Delete file and all versions |
+| `GetAttachmentsAsync(owner)` | Get all files attached to entity |
+| `GetAttachmentsOfCategoryAsync(owner, category)` | Get files by category |
+| `CopyAttachmentsToAsync(source, destination)` | Copy all files between entities |
+| `GetNewOrDefaultVersionAsync(StoredFile)` | Create new version for upload |
+| `UpdateVersionContentAsync(StoredFileVersion, Stream)` | Update version content |
+| `RenameFileAsync(StoredFile, fileName)` | Rename a file |
+| `MarkDownloadedAsync(StoredFileVersion)` | Track download |
+
+### What NOT to Do in Application Services
+
+- **Do NOT** create `[HttpPost] UploadFileAsync(IFormFile file)` endpoints — the framework's `StoredFileController` already provides these.
+- **Do NOT** create `[HttpGet] DownloadFileAsync(Guid id)` endpoints — use the framework's `StoredFileController/Download`.
+- **Do NOT** write file bytes to disk or cloud storage directly — `IStoredFileService` handles storage backend abstraction.
+- **Do NOT** create DTOs to track file metadata (name, size, type, etc.) — the framework's `StoredFileDto` already covers this.

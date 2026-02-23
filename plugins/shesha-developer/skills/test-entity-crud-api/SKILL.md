@@ -38,14 +38,17 @@ Arguments received: `$ARGUMENTS`
 
 ### Step 2: Run the Endpoint Tests
 
-The test scripts are located in this skill's `scripts/` folder. Execute from the repository root:
+The scripts run directly from the skill's `scripts/` folder. Use the `-RepoRoot` parameter to point at the current project. **Always include `-UpdateEntities`** so the entity list stays in sync with the current domain model.
+
+Execute from the repository root:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File ".claude/skills/test-entity-crud-api/scripts/Run-EndpointTests.ps1" -FullErrors
+powershell -ExecutionPolicy Bypass -File "<skill-base-dir>/scripts/Run-EndpointTests.ps1" -RepoRoot "<repo-root>" -FullErrors -UpdateEntities
 ```
 
+Replace `<skill-base-dir>` with this skill's base directory and `<repo-root>` with the project's repository root (the working directory).
+
 Add `-StartServer` if `--start-server` was passed. This will first run `dotnet build` on the auto-detected solution, then start the server with `--no-build`.
-Add `-UpdateEntities` if `--update-entities` was passed.
 
 ### Step 3: Analyze Results
 
@@ -87,9 +90,9 @@ Summarize:
 
 ## File Locations
 
-- **Skill Scripts:** `.claude/skills/test-entity-crud-api/scripts/`
-  - `Run-EndpointTests.ps1` - Main test runner (auto-detects project structure)
-  - `Test-Endpoints.ps1` - Endpoint test logic
+- **Skill Scripts:** `<skill-base-dir>/scripts/` (run directly from the skill cache — no project copy needed)
+  - `Run-EndpointTests.ps1` - Main test runner (auto-detects project structure, accepts `-RepoRoot`)
+  - `Test-Endpoints.ps1` - Endpoint test logic (entity list auto-populated by `-UpdateEntities`)
   - `test-api.cmd` - Batch file wrapper
 - **Domain Entities:** Auto-detected from `*.Domain/Domain/` folder
 - **Migrations:** Located in the Domain project's `Migrations/` folder

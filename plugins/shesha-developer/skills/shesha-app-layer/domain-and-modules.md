@@ -31,7 +31,15 @@ namespace {ModuleNamespace}.Domain.{EntityNamePlural}
 
         // Navigation (single)
         public virtual Person Person { get; set; }
+
+        // Single file property — use [StoredFile] attribute and the framework's StoredFile entity
+        // Upload/download handled automatically by StoredFileController
+        [StoredFile(IsVersionControlled = true)]
         public virtual StoredFile Attachment { get; set; }
+
+        // For multiple file attachments, do NOT add a collection property.
+        // Use the framework's Owner pattern — files are linked via StoredFile.Owner
+        // and managed through StoredFileController endpoints (Upload, FilesList, etc.)
 
         // Navigation (collection)
         [InverseProperty("PartOfId")]
@@ -58,12 +66,15 @@ public class {EntityName} : {BaseFrameworkEntity}
 ```
 
 **Key rules:**
+
 - All properties `virtual` (NHibernate)
 - `[Entity(TypeShortAlias)]` on every entity
 - `[Discriminator]` when extending framework entities
 - `[ReferenceList]` for lookups, `[StringLength]` on strings
 - `[ReadonlyProperty]` for computed, `[InverseProperty]` for collections
 - Base class: `FullAuditedEntity<Guid>`
+- For file/document properties, use `StoredFile` with `[StoredFile]` attribute — do NOT create custom file entities
+- For file attachment lists, use the Owner pattern (no collection property needed) — do NOT add `IList<StoredFile>`
 
 ---
 

@@ -10,6 +10,7 @@
 - [String Property Length Guidelines](#string-property-length-guidelines)
 - [The virtual Keyword](#the-virtual-keyword)
 - [Child Entities](#child-entities)
+- [Generic Entity References](#generic-entity-references)
 - [Sample Entity Class](#sample-entity-class)
 - [Placement of Files](#placement-of-files)
 
@@ -267,6 +268,113 @@ Custom file management should **only** be implemented if the framework's capabil
 - Bulk file import/export with custom transformation logic.
 
 Even in these cases, consider storing the resulting files back into `StoredFile` for consistency and UI integration.
+
+### Generic Entity References
+
+A `GenericEntityReference` is a special property type that allows an entity to reference **any other entity** without a fixed foreign key relationship. Use this when a property needs to point to different entity types depending on context.
+
+At the database level, a `GenericEntityReference` maps to **two or three columns**:
+
+| Column | Type | Description |
+|---|---|---|
+| `{Property}Id` | `nvarchar(100)` | The GUID of the referenced entity |
+| `{Property}ClassName` | `nvarchar(1000)` | The fully qualified class name of the referenced entity |
+| `{Property}DisplayName` | `nvarchar(1000)` | *(Optional)* Cached display name for quick UI rendering |
+
+The third column (`DisplayName`) is only added when you opt in via `[EntityReference(true)]`.
+
+#### When to Use
+
+Use `GenericEntityReference` when:
+- A property needs to reference **different entity types** (e.g., an audit log entry that can relate to any entity)
+- You want a **polymorphic association** without a separate FK for each target type
+
+Use a standard entity reference (FK) when:
+- The property always references the **same entity type**
+- You need **database-level referential integrity** (no FK constraints are created for generic references)
+
+#### Defining the Property
+
+```csharp
+using Shesha.Domain.Attributes;
+using Shesha.EntityReferences;
+
+public class AuditEntry : FullAuditedEntity<Guid>
+{
+    public virtual string Action { get; set; }
+
+    /// <summary>
+    /// The entity this audit entry relates to.
+    /// The 'true' parameter stores the display name for quick UI rendering.
+    /// </summary>
+    [EntityReference(true)]
+    public virtual GenericEntityReference RelatedEntity { get; set; }
+}
+```
+
+The `[EntityReference]` attribute accepts the following parameters:
+
+| Parameter | Type | Description |
+|---|---|---|
+| `storeDisplayName` | `bool` | When `true`, adds a `DisplayName` column. Default is `false`. |
+
+#### Working with GenericEntityReference in Code
+
+**Creating from an entity instance** (ID, class name, display name extracted automatically):
+
+```csharp
+var person = await _personRepository.GetAsync(personId);
+var auditEntry = new AuditEntry
+{
+    Action = "Reviewed",
+    RelatedEntity = new GenericEntityReference(person)
+};
+```
+
+**Creating manually** (when you don't have the entity loaded):
+
+```csharp
+var auditEntry = new AuditEntry
+{
+    RelatedEntity = new GenericEntityReference(
+        id: "550e8400-e29b-41d4-a716-446655440000",
+        typeName: "Shesha.Core.Person",
+        displayName: "John Smith"
+    )
+};
+```
+
+**Reading properties:**
+
+```csharp
+string entityId = entry.RelatedEntity?.Id;                // "550e8400-..."
+string entityType = entry.RelatedEntity?._className;      // "Shesha.Core.Person"
+string displayText = entry.RelatedEntity?._displayName;   // "John Smith"
+```
+
+#### API Format
+
+When returned from an API, a `GenericEntityReference` is serialized as:
+
+```json
+{
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "_className": "Shesha.Core.Person",
+    "_displayName": "John Smith"
+}
+```
+
+When sending in API requests, include at least `id` and `_className`.
+
+#### Display Name Resolution
+
+When created from an entity instance, the framework resolves the display name by looking for (in priority order):
+1. A property decorated with `[EntityDisplayName]`
+2. A property named `Name`, `DisplayName`, `FullName`, `Address`, or `FullAddress`
+
+#### Database Migration
+
+See [DatabaseMigrations.md](DatabaseMigrations.md) § Adding Columns for GenericEntityReference.
 
 ### Sample Entity Class
 

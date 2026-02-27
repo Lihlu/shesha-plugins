@@ -187,25 +187,66 @@ if (!Schema.Table("MyModule_BaseEntities").Column(SheshaDatabaseConsts.Discrimin
 
 ## Adding Columns for GenericEntityReference
 
-When adding a GenericEntityReference property in an entity, you need to create three columns in the database migration:
+A `GenericEntityReference` property stores a polymorphic reference to any entity via two or three columns. Use the `AddGenericEntityReferenceColumns` Shesha extension method:
+
+### With display name (when entity uses `[EntityReference(true)]`):
+
+<example>
+
+```csharp
+// Adds: RelatedEntityId (nvarchar(100)), RelatedEntityClassName (nvarchar(1000)), RelatedEntityDisplayName (nvarchar(1000))
+Alter.Table("MyModule_AuditEntries")
+    .AddGenericEntityReferenceColumns("RelatedEntity", storeDisplayName: true);
+```
+
+</example>
+
+### Without display name (default):
+
+<example>
+
+```csharp
+// Adds: RelatedEntityId (nvarchar(100)), RelatedEntityClassName (nvarchar(1000))
+Alter.Table("MyModule_AuditEntries")
+    .AddGenericEntityReferenceColumns("RelatedEntity");
+```
+
+</example>
+
+### Manual column creation (if you prefer explicit control):
 
 <example>
 
 ```csharp
 Alter.Table("MyModule_Entities")
-    .AddColumn("HasMemberId").AsString().Nullable()
-    .AddColumn("HasMemberClassName").AsString().Nullable()
-    .AddColumn("HasMemberDisplayName").AsString().Nullable();
+    .AddColumn("HasMemberId").AsString(100).Nullable()
+    .AddColumn("HasMemberClassName").AsString(1000).Nullable()
+    .AddColumn("HasMemberDisplayName").AsString(1000).Nullable();  // Optional — only if [EntityReference(true)]
 ```
 
 </example>
 
-These three columns work together to store:
-1. The ID of the referenced entity
-2. The class/type name of the referenced entity
-3. A display name for the referenced entity
+### On a new table:
 
-This allows for polymorphic references where a property can point to entities of different types.
+<example>
+
+```csharp
+Create.Table("MyModule_AuditEntries")
+    .WithIdAsGuid()
+    .WithFullAuditColumns()
+    .WithColumn("Action").AsString(100).Nullable()
+    .WithColumn("Description").AsString(2000).Nullable();
+
+Alter.Table("MyModule_AuditEntries")
+    .AddGenericEntityReferenceColumns("RelatedEntity", storeDisplayName: true);
+```
+
+</example>
+
+The columns work together to store:
+1. `{Property}Id` — The ID of the referenced entity
+2. `{Property}ClassName` — The fully qualified class name of the referenced entity
+3. `{Property}DisplayName` — *(Optional)* Cached display name for UI rendering
 
 ## Adding Foreign Key Columns
 

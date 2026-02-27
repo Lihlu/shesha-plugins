@@ -10,6 +10,7 @@ description: Creates and modifies domain entities, reference lists, and database
 - Creating new entities and domain models in a Shesha application
 - **Updating existing entities** (adding, removing, or modifying properties)
 - Implementing or modifying entity relationships and aggregates
+- Adding **generic entity references** (`GenericEntityReference`) for polymorphic associations
 - Creating database migrations for new or modified entities
 - Implementing or updating reference lists (code-based and data-based)
 - Renaming or refactoring domain model properties
@@ -27,7 +28,7 @@ Whenever making changes to domain model entity classes — whether creating new 
 
 Detailed implementation patterns and examples are in these files — read the relevant ones based on the task:
 
-- [reference/DomainModelling.md](reference/DomainModelling.md) — Entity classes, base classes, attributes, property conventions, file placement
+- [reference/DomainModelling.md](reference/DomainModelling.md) — Entity classes, base classes, attributes, property conventions, generic entity references, file placement
 - [reference/DomainService.md](reference/DomainService.md) — Domain service/manager classes
 - [reference/ReferenceLists.md](reference/ReferenceLists.md) — Code-based (enum) and data-based reference lists
 - [reference/DatabaseMigrations.md](reference/DatabaseMigrations.md) — FluentMigrator migrations, table/column naming, examples

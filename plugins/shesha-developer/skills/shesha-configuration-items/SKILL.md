@@ -85,7 +85,7 @@ Scaffold and manage custom configuration items for a Shesha/.NET/ABP/NHibernate 
 | Joined table | `{Prefix}_{ConfigName}s` | `Leave_LeaveTypeConfigs` |
 | DB columns | `{Prefix}_{PropertyName}` | `Leave_AllowBackDating` |
 | Reference list columns | `{Prefix}_{Name}Lkp` | `Leave_TypeOfDaysLkp` |
-| FK columns | `{Name}Id` | `OverflowLeaveTypeId` |
+| FK columns | `{Prefix}_{Name}Id` | `Leave_OverflowLeaveTypeId` |
 
 ### Key Interfaces
 
@@ -123,7 +123,8 @@ Determine the type of change, then follow the appropriate path:
 - [ ] Step 4: Create manager interface and implementation (artifact 3)
 - [ ] Step 5: Create distribution DTO, exporter, and importer (artifacts 4-6)
 - [ ] Step 6: Register manager, exporter, and importer in Application module (artifact 7)
-- [ ] Step 7: Create admin forms via Shesha MCP or notify user (artifact 8)
+- [ ] Step 7: Verify NHibernate mappings (see Verification section below)
+- [ ] Step 8: Create admin forms via Shesha MCP or notify user (artifact 8)
 ```
 
 ### Update Existing Config Item Workflow
@@ -134,7 +135,26 @@ Determine the type of change, then follow the appropriate path:
 - [ ] Step 3: Create new migration to alter the joined table
 - [ ] Step 4: Update distribution DTO with new properties
 - [ ] Step 5: Update exporter and importer to map new properties
+- [ ] Step 6: Verify NHibernate mappings (see Verification section below)
 ```
+
+### Verification
+
+After creating or updating a configuration item, verify the NHibernate mappings work by hitting these two API endpoints (requires the server to be running with the new migration applied):
+
+**1. Verify the specific config item type:**
+```
+GET /api/services/app/Entities/GetAll?entityType={FullyQualifiedEntityTypeName}&maxResultCount=1
+```
+Expected: `{"success": true, "result": {"totalCount": 0, ...}}`
+
+**2. Verify the polymorphic ConfigurationItemBase query (exercises ALL joined tables):**
+```
+GET /api/services/app/Entities/GetAll?entityType=Shesha.Domain.ConfigurationItemBase&maxResultCount=1
+```
+Expected: `{"success": true, "result": {"totalCount": N, ...}}` where N > 0
+
+If either endpoint returns `success: false` with a SQL error mentioning "Invalid column name", the migration column names don't match NHibernate's expected naming convention. The most common cause is FK columns missing the `{Prefix}_` prefix in `[JoinedProperty]` tables.
 
 ### Key Rules
 
@@ -142,6 +162,7 @@ Determine the type of change, then follow the appropriate path:
 - **Origin on subsequent versions** — set `Origin = item.Origin` in `CreateNewVersionAsync`.
 - **Virtual properties** — every entity property must be `virtual` for NHibernate.
 - **FK to ConfigurationItems** — the joined table MUST have a FK from `Id` to `Frwk_ConfigurationItems.Id`.
+- **FK column prefix** — ALL columns in `[JoinedProperty]` tables MUST use the `{Prefix}_` prefix, including FK columns. NHibernate's convention prefixes every column with the table prefix. Example: table `LB_MyConfigs` → FK column must be `LB_RelatedEntityId`, NOT `RelatedEntityId`.
 - **ITransientDependency** — exporters and importers must implement `ITransientDependency`.
 - **Match by Name + Module** — importers identify existing items by `Name` + `Module.Name` + `IsLast`.
 - **Only register what you implement** — skip manager registration if not needed; skip export/import if not needed.

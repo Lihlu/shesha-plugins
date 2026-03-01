@@ -4,13 +4,13 @@ Three classes enable configuration item portability across environments.
 
 ## §1 Distribution DTO
 
-Serializable representation of the configuration item. Lives in the `Distribution/` folder alongside the exporter and importer (no `Dto/` subdirectory). Only includes serializable primitives — no entity references.
+Serializable representation of the configuration item. Lives in the `Distribution/` subfolder next to the entity in the Domain project (no `Dto/` subdirectory). Only includes serializable primitives — no entity references.
 
 ```csharp
 using Shesha.ConfigurationItems.Distribution;
 using System;
 
-namespace {Namespace}.Application.{ConfigName}s.Distribution
+namespace {Namespace}.Domain.{ConfigName}s.Distribution
 {
     public class Distributed{ConfigName} : DistributedConfigurableItemBase
     {
@@ -58,9 +58,8 @@ Converts from entity to distribution DTO and serializes to JSON.
 
 ```csharp
 using Shesha.ConfigurationItems.Distribution;
-using {EntityNamespace};
 
-namespace {Namespace}.Application.{ConfigName}s.Distribution
+namespace {Namespace}.Domain.{ConfigName}s.Distribution
 {
     public interface I{ConfigName}Export : IConfigurableItemExport<{ConfigName}>
     {
@@ -77,12 +76,11 @@ using Newtonsoft.Json;
 using Shesha.ConfigurationItems.Distribution;
 using Shesha.Domain;
 using Shesha.Services;
-using {EntityNamespace};
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace {Namespace}.Application.{ConfigName}s.Distribution
+namespace {Namespace}.Domain.{ConfigName}s.Distribution
 {
     public class {ConfigName}Export : I{ConfigName}Export, ITransientDependency
     {
@@ -179,9 +177,8 @@ Reads JSON and creates or updates entities in the database.
 
 ```csharp
 using Shesha.ConfigurationItems.Distribution;
-using {EntityNamespace};
 
-namespace {Namespace}.Application.{ConfigName}s.Distribution
+namespace {Namespace}.Domain.{ConfigName}s.Distribution
 {
     public interface I{ConfigName}Import : IConfigurableItemImport<{ConfigName}>
     {
@@ -200,12 +197,11 @@ using Shesha.Domain;
 using Shesha.Domain.ConfigurationItems;
 using Shesha.Services;
 using Shesha.Services.ConfigurationItems;
-using {EntityNamespace};
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace {Namespace}.Application.{ConfigName}s.Distribution
+namespace {Namespace}.Domain.{ConfigName}s.Distribution
 {
     public class {ConfigName}Import : ConfigurationItemImportBase,
         I{ConfigName}Import, ITransientDependency

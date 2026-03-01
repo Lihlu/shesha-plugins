@@ -6,9 +6,8 @@ The manager handles versioning lifecycle: copy, create new version, status trans
 
 ```csharp
 using Shesha.ConfigurationItems;
-using {EntityNamespace};
 
-namespace {Namespace}.Application.{ConfigName}s
+namespace {Namespace}.Domain.{ConfigName}s
 {
     public interface I{ConfigName}Manager : IConfigurationItemManager<{ConfigName}>
     {
@@ -25,11 +24,10 @@ using Shesha.ConfigurationItems;
 using Shesha.ConfigurationItems.Models;
 using Shesha.Domain.ConfigurationItems;
 using Shesha.Dto.Interfaces;
-using {EntityNamespace};
 using System;
 using System.Threading.Tasks;
 
-namespace {Namespace}.Application.{ConfigName}s
+namespace {Namespace}.Domain.{ConfigName}s
 {
     public class {ConfigName}Manager
         : ConfigurationItemManager<{ConfigName}>, I{ConfigName}Manager

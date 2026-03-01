@@ -9,8 +9,8 @@ using Abp.Modules;
 using Shesha;
 using Shesha.ConfigurationItems;
 using {EntityNamespace};
-using {Namespace}.Application.{ConfigName}s;
-using {Namespace}.Application.{ConfigName}s.Distribution;
+using {Namespace}.Domain.{ConfigName}s;
+using {Namespace}.Domain.{ConfigName}s.Distribution;
 
 namespace {Namespace}.Application
 {

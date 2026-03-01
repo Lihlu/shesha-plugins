@@ -21,10 +21,10 @@ Scaffold and manage custom configuration items for a Shesha/.NET/ABP/NHibernate 
 |---|----------|---------|-----------|
 | 1 | Domain Entity | Domain | [reference/entity.md](reference/entity.md) |
 | 2 | Database Migration | Domain | [reference/migration.md](reference/migration.md) |
-| 3 | Manager | Application | [reference/manager.md](reference/manager.md) |
-| 4 | Distribution DTO | Application | [reference/distribution.md](reference/distribution.md) §1 |
-| 5 | Exporter | Application | [reference/distribution.md](reference/distribution.md) §2 |
-| 6 | Importer | Application | [reference/distribution.md](reference/distribution.md) §3 |
+| 3 | Manager | Domain | [reference/manager.md](reference/manager.md) |
+| 4 | Distribution DTO | Domain | [reference/distribution.md](reference/distribution.md) §1 |
+| 5 | Exporter | Domain | [reference/distribution.md](reference/distribution.md) §2 |
+| 6 | Importer | Domain | [reference/distribution.md](reference/distribution.md) §3 |
 | 7 | Module Registration | Application | [reference/registration.md](reference/registration.md) |
 | 8 | Admin Forms | (UI) | [reference/admin-forms.md](reference/admin-forms.md) |
 
@@ -35,20 +35,18 @@ Scaffold and manage custom configuration items for a Shesha/.NET/ABP/NHibernate 
   Domain/{ConfigName}s/
     {ConfigName}.cs                        ← Entity (artifact 1)
     RefList{EnumName}.cs                   ← Related reference list enums
+    I{ConfigName}Manager.cs                ← Manager interface (artifact 3)
+    {ConfigName}Manager.cs                 ← Manager implementation (artifact 3)
+    Distribution/
+      Distributed{ConfigName}.cs           ← Distribution DTO (artifact 4)
+      I{ConfigName}Export.cs               ← Exporter interface (artifact 5)
+      {ConfigName}Export.cs                ← Exporter implementation (artifact 5)
+      I{ConfigName}Import.cs               ← Importer interface (artifact 6)
+      {ConfigName}Import.cs                ← Importer implementation (artifact 6)
   Migrations/
     M{YYYYMMDDHHmmss}.cs                  ← Migration (artifact 2)
 
 {Module}.Application/
-  ConfigurationItems/
-    {ConfigName}s/
-      I{ConfigName}Manager.cs                ← Manager interface (artifact 3)
-      {ConfigName}Manager.cs                 ← Manager implementation (artifact 3)
-      Distribution/
-        Distributed{ConfigName}.cs         ← Distribution DTO (artifact 4)
-        I{ConfigName}Export.cs               ← Exporter interface (artifact 5)
-        {ConfigName}Export.cs                ← Exporter implementation (artifact 5)
-        I{ConfigName}Import.cs               ← Importer interface (artifact 6)
-        {ConfigName}Import.cs                ← Importer implementation (artifact 6)
   {Module}ApplicationModule.cs             ← Registration (artifact 7)
 ```
 

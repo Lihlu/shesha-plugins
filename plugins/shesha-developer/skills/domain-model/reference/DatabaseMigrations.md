@@ -21,7 +21,18 @@ Shesha uses Fluent Migrator for database migrations with additional Shesha-speci
 
 ### Migration ID Naming Convention
 
-The migration number must be unique across all migrations in the application and usually follows the format: `YYYYMMDDHHMMSS` (Year, Month, Day, Hour, Minute, Second). This ensures migrations are executed in the correct order.
+The migration number MUST use the **actual current UTC date and time** at the moment of generation, formatted as `YYYYMMDDHHmmss` (Year, Month, Day, Hour, Minute, Second). This ensures uniqueness and correct execution order.
+
+**CRITICAL**: Do NOT use placeholder, rounded, or invented timestamps (e.g., `20250302000000` or `20250302120000`). The hour, minute, and second components MUST reflect the real current UTC time. For example, if the current UTC time is `2025-03-02 14:37:52`, the migration ID must be `20250302143752`.
+
+When creating multiple migration files in the same session, increment the seconds by 1 for each subsequent migration to guarantee uniqueness (e.g., `20250302143752`, `20250302143753`, `20250302143754`).
+
+**To get the correct timestamp**, run the helper script before creating a migration:
+```bash
+bash scripts/migration-timestamp.sh       # current UTC time
+bash scripts/migration-timestamp.sh 1     # +1 second (for a second migration)
+```
+Or use an inline command: `date -u +"%Y%m%d%H%M%S"`
 
 ### Important Guidelines
 

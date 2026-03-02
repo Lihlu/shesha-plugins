@@ -25,6 +25,9 @@ description: Creates and modifies domain entities, reference lists, and database
 **MANDATORY: Database Migrations for Every Domain Change**
 Whenever making changes to domain model entity classes — whether creating new entities, adding/removing/renaming properties, changing relationships, or updating reference lists — you MUST ALWAYS create the corresponding database migration classes. No domain model change is complete without its migration.
 
+**MANDATORY: Accurate Migration Timestamps**
+Migration IDs use the format `YYYYMMDDHHmmss` and MUST reflect the **actual current UTC time**. Before creating any migration, run `date -u +"%Y%m%d%H%M%S"` (or `scripts/migration-timestamp.sh`) to get the correct timestamp. Do NOT use placeholder or rounded values — the hour, minute, and second components must be accurate. For multiple migrations in one session, increment the seconds by 1.
+
 ## Reference Documentation
 
 Detailed implementation patterns and examples are in these files — read the relevant ones based on the task:

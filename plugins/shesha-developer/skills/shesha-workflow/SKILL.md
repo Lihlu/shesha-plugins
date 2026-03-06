@@ -31,8 +31,11 @@ Generate workflow artifacts for a Shesha/.NET/ABP/NHibernate application based o
 | 10 | Workflow Extensions | Application | [service-tasks.md](service-tasks.md) §5 |
 | 11 | Hangfire Background Job for Batch Initiation | Application | [service-tasks.md](service-tasks.md) §6 |
 | 12 | Database Migration | Domain | [migrations.md](migrations.md) |
+| 13 | Dashboard / Admin Queries | Application | [querying-and-dashboards.md](querying-and-dashboards.md) §5–§6 |
+| 14 | View Entities (pre-built) | Domain (read-only) | [querying-and-dashboards.md](querying-and-dashboards.md) §2 |
 
 **When generating multiple artifacts**, always create the Instance + Definition pair first, then add Service Tasks per workflow step.
+**When building dashboard or admin views**, consult the [querying-and-dashboards.md](querying-and-dashboards.md) reference for pre-built view entities, query patterns, and application service examples.
 
 ## Folder structure
 
@@ -90,6 +93,12 @@ Generate workflow artifacts for a Shesha/.NET/ABP/NHibernate application based o
 | `WorkflowExecutionLogItem` | `Shesha.Workflow.Domain` | External-trigger auto-completion |
 | `IRepository<WorkflowInstance, Guid>` | `Abp.Domain.Repositories` | Manager manual instance creation |
 | `ILogger<T>` | `Microsoft.Extensions.Logging` | Structured logging in service tasks |
+| `WorkflowInstanceDashboardItem` | `Shesha.Workflow.Domain.ViewEntities` | Dashboard listing view entity |
+| `WorkflowStatisticsItem` | `Shesha.Workflow.Domain.ViewEntities` | Step-level statistics with timing and decisions |
+| `WorkflowInboxItem` | `Shesha.Workflow.Domain.ViewEntities` | User inbox (pending tasks) |
+| `WorkflowSentItem` | `Shesha.Workflow.Domain.ViewEntities` | Completed tasks sent by user |
+| `ProcessProgressItem` | `Shesha.Workflow.Domain.ViewEntities` | Step progress indicator for a workflow |
+| `WorkflowTimelineItem` | `Shesha.Workflow.Domain.ViewEntities` | Timeline/audit trail view |
 
 ### Key attributes
 

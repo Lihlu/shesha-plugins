@@ -36,6 +36,7 @@ Generate workflow artifacts for a Shesha/.NET/ABP/NHibernate application based o
 
 **When generating multiple artifacts**, always create the Instance + Definition pair first, then add Service Tasks per workflow step.
 **When building dashboard or admin views**, consult the [querying-and-dashboards.md](querying-and-dashboards.md) reference for pre-built view entities, query patterns, and application service examples.
+**When debugging a running workflow instance**, use the `/analyze-workflow-state` skill instead — it parses ProcessState XML, fetches live data from the backend API, and diagnoses execution issues.
 
 ## Folder structure
 

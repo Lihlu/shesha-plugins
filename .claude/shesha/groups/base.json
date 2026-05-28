@@ -1,330 +1,527 @@
 {
   "_meta": {
     "version": 3,
-    "generated": "2026-05-22T08:44:41.645Z",
+    "generated": "2026-05-28T06:06:56.056Z",
     "group": "base"
   },
   "base": {
     "props": [
-      "_formFields",
-      "allStyles",
-      "autoHeight",
-      "autoWidth",
-      "background",
-      "backgroundBase64",
-      "backgroundColor",
-      "backgroundCover",
-      "backgroundDataSource",
-      "backgroundPosition",
-      "backgroundRepeat",
-      "backgroundStoredFileId",
-      "backgroundType",
-      "backgroundUrl",
-      "block",
-      "border",
-      "borderColor",
-      "borderRadius",
-      "borderSize",
-      "borderStyle",
-      "borderType",
-      "borderWidth",
-      "className",
-      "color",
-      "componentName",
-      "components",
-      "context",
-      "customEnabled",
-      "customVisibility",
-      "defaultValue",
-      "description",
-      "desktop",
-      "dimensions",
-      "editMode",
-      "enableStyleOnReadonly",
-      "font",
-      "fontColor",
-      "fontSize",
-      "fontWeight",
-      "height",
-      "hidden",
-      "hideBorder",
-      "hideLabel",
-      "hideScrollBar",
-      "id",
-      "initialContext",
-      "injectedDefaultValue",
-      "injectedTableRow",
-      "inputStyles",
-      "isDynamic",
-      "jsSetting",
-      "label",
-      "labelAlign",
-      "layout",
-      "listType",
-      "menuItemShadow",
-      "mobile",
-      "noDataIcon",
-      "noDataSecondaryText",
-      "noDataText",
-      "noLabelAutoMargin",
-      "onBlurCustom",
-      "onChangeCustom",
-      "onClickCustom",
-      "onFocusCustom",
-      "onSelectCustom",
-      "overflow",
-      "parentId",
-      "permissions",
-      "placeholder",
-      "primaryBgColor",
-      "primaryTextColor",
-      "propertyName",
-      "queryParams",
-      "readOnly",
-      "secondaryBgColor",
-      "secondaryTextColor",
-      "settingsValidationErrors",
-      "shadow",
-      "size",
-      "style",
-      "stylingBox",
-      "subscribedEventNames",
-      "tablet",
-      "tooltip",
-      "type",
-      "validate",
-      "version",
-      "width",
-      "wrapperStyle",
-      "customStyle"
-    ],
-    "types": {
-      "hideLabel": "boolean",
-      "hidden": "boolean",
-      "readOnly": "boolean",
-      "isDynamic": "boolean",
-      "jsSetting": "boolean",
-      "autoWidth": "boolean",
-      "autoHeight": "boolean",
-      "hideScrollBar": "boolean",
-      "enableStyleOnReadonly": "boolean",
-      "noLabelAutoMargin": "boolean",
-      "block": "boolean",
-      "hideBorder": "boolean",
-      "id": "string",
-      "type": "string",
-      "parentId": "string",
-      "componentName": "string",
-      "propertyName": "string",
-      "context": "string",
-      "initialContext": "string",
-      "label": "string",
-      "labelAlign": "string",
-      "customVisibility": "script",
-      "onBlurCustom": "script",
-      "onChangeCustom": "script",
-      "onClickCustom": "script",
-      "onFocusCustom": "script",
-      "onSelectCustom": "script",
-      "customEnabled": "script",
-      "style": "script",
-      "stylingBox": "script",
-      "wrapperStyle": "script",
-      "className": "string",
-      "editMode": "string",
-      "size": "string",
-      "noDataText": "string",
-      "noDataIcon": "string",
-      "noDataSecondaryText": "string",
-      "listType": "string",
-      "version": "number",
-      "validate": "object",
-      "border": "object",
-      "background": "object",
-      "font": "object",
-      "shadow": "object",
-      "menuItemShadow": "object",
-      "dimensions": "object",
-      "inputStyles": "object",
-      "allStyles": "object",
-      "permissions": "array",
-      "_formFields": "array",
-      "subscribedEventNames": "array",
-      "customStyle": "script"
-    },
-    "scripts": {
-      "customStyle": {
-        "returns": "object",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Return a React CSSProperties object. Use camelCase keys and quoted string values."
+      {
+        "name": "_formFields",
+        "type": "array",
+        "required": false,
+        "JsReturnType": "array"
       },
-      "customVisibility": {
-        "returns": "boolean",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Return true to show the component, false to hide it."
+      {
+        "name": "allStyles",
+        "type": "object",
+        "required": false,
+        "JsReturnType": "object"
       },
-      "customEnabled": {
-        "returns": "boolean",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Return true to enable the component, false to disable it."
+      {
+        "name": "autoHeight",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
       },
-      "onChangeCustom": {
-        "returns": "void",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called when the field value changes. value holds the new value."
+      {
+        "name": "autoWidth",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
       },
-      "onBlurCustom": {
-        "returns": "void",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called when the field loses focus."
+      {
+        "name": "background",
+        "type": "background-config",
+        "required": false,
+        "JsReturnType": "background-config"
       },
-      "onClickCustom": {
-        "returns": "void",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called when the component is clicked."
+      {
+        "name": "backgroundBase64",
+        "required": false
       },
-      "onFocusCustom": {
-        "returns": "void",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called when the field gains focus."
+      {
+        "name": "backgroundColor",
+        "required": false
       },
-      "onSelectCustom": {
-        "returns": "void",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called when an option is selected."
+      {
+        "name": "backgroundCover",
+        "required": false
       },
-      "style": {
-        "returns": "object",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Return a React CSSProperties object applied to the field wrapper."
+      {
+        "name": "backgroundDataSource",
+        "required": false
       },
-      "wrapperStyle": {
-        "returns": "object",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "value",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Return a React CSSProperties object applied to the outer wrapper."
+      {
+        "name": "backgroundPosition",
+        "required": false
       },
-      "stylingBox": {
-        "returns": "object",
+      {
+        "name": "backgroundRepeat",
+        "required": false
+      },
+      {
+        "name": "backgroundStoredFileId",
+        "required": false
+      },
+      {
+        "name": "backgroundType",
+        "required": false
+      },
+      {
+        "name": "backgroundUrl",
+        "required": false
+      },
+      {
+        "name": "block",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "border",
+        "type": "border-config",
+        "required": false,
+        "JsReturnType": "border-config"
+      },
+      {
+        "name": "borderColor",
+        "required": false
+      },
+      {
+        "name": "borderRadius",
+        "required": false
+      },
+      {
+        "name": "borderSize",
+        "required": false
+      },
+      {
+        "name": "borderStyle",
+        "required": false
+      },
+      {
+        "name": "borderType",
+        "required": false
+      },
+      {
+        "name": "borderWidth",
+        "required": false
+      },
+      {
+        "name": "className",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "color",
+        "required": false
+      },
+      {
+        "name": "componentName",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "components",
+        "required": false
+      },
+      {
+        "name": "context",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "customEnabled",
+        "type": "script",
+        "desc": "Return true to enable the component, false to disable it.",
+        "required": false,
+        "JsReturnType": "boolean",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "customVisibility",
+        "type": "script",
+        "desc": "Return true to show the component, false to hide it.",
+        "required": false,
+        "JsReturnType": "boolean",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "defaultValue",
+        "required": false
+      },
+      {
+        "name": "description",
+        "required": false
+      },
+      {
+        "name": "desktop",
+        "required": false,
+        "type": "style-config",
+        "JsReturnType": "style-config"
+      },
+      {
+        "name": "dimensions",
+        "type": "dimensions-config",
+        "required": false,
+        "JsReturnType": "dimensions-config"
+      },
+      {
+        "name": "editMode",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "enableStyleOnReadonly",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "font",
+        "type": "font-config",
+        "required": false,
+        "JsReturnType": "font-config"
+      },
+      {
+        "name": "fontColor",
+        "required": false
+      },
+      {
+        "name": "fontSize",
+        "required": false
+      },
+      {
+        "name": "fontWeight",
+        "required": false
+      },
+      {
+        "name": "height",
+        "required": false
+      },
+      {
+        "name": "hidden",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "hideBorder",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "hideLabel",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "hideScrollBar",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "initialContext",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "injectedDefaultValue",
+        "required": false
+      },
+      {
+        "name": "injectedTableRow",
+        "required": false
+      },
+      {
+        "name": "inputStyles",
+        "type": "object",
+        "required": false,
+        "JsReturnType": "object"
+      },
+      {
+        "name": "isDynamic",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "jsSetting",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "labelAlign",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "layout",
+        "required": false
+      },
+      {
+        "name": "listType",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "menuItemShadow",
+        "type": "object",
+        "required": false,
+        "JsReturnType": "object"
+      },
+      {
+        "name": "mobile",
+        "required": false,
+        "type": "style-config",
+        "JsReturnType": "style-config"
+      },
+      {
+        "name": "noDataIcon",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "noDataSecondaryText",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "noDataText",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "noLabelAutoMargin",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "onBlurCustom",
+        "type": "script",
+        "desc": "Called when the field loses focus.",
+        "required": false,
+        "JsReturnType": "void",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "onChangeCustom",
+        "type": "script",
+        "desc": "Called when the field value changes. value holds the new value.",
+        "required": false,
+        "JsReturnType": "void",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "onClickCustom",
+        "type": "script",
+        "desc": "Called when the component is clicked.",
+        "required": false,
+        "JsReturnType": "void",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "onFocusCustom",
+        "type": "script",
+        "desc": "Called when the field gains focus.",
+        "required": false,
+        "JsReturnType": "void",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "onSelectCustom",
+        "type": "script",
+        "desc": "Called when an option is selected.",
+        "required": false,
+        "JsReturnType": "void",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "overflow",
+        "required": false
+      },
+      {
+        "name": "parentId",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "permissions",
+        "type": "array",
+        "required": false,
+        "JsReturnType": "array"
+      },
+      {
+        "name": "placeholder",
+        "required": false
+      },
+      {
+        "name": "primaryBgColor",
+        "required": false
+      },
+      {
+        "name": "primaryTextColor",
+        "required": false
+      },
+      {
+        "name": "propertyName",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "queryParams",
+        "required": false
+      },
+      {
+        "name": "readOnly",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "secondaryBgColor",
+        "required": false
+      },
+      {
+        "name": "secondaryTextColor",
+        "required": false
+      },
+      {
+        "name": "settingsValidationErrors",
+        "required": false
+      },
+      {
+        "name": "shadow",
+        "type": "shadow-config",
+        "required": false,
+        "JsReturnType": "shadow-config"
+      },
+      {
+        "name": "size",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "style",
+        "type": "script",
+        "desc": "Return a React CSSProperties object applied to the field wrapper.",
+        "required": false,
+        "JsReturnType": "object",
         "async": false,
         "context": [
           "data",
@@ -338,94 +535,207 @@
           "moment",
           "setFormData"
         ],
-        "description": "Return a styling configuration object for the component box."
+        "keyCase": "camel",
+        "valueType": "string"
+      },
+      {
+        "name": "stylingBox",
+        "type": "script",
+        "desc": "Return a styling configuration object for the component box.",
+        "required": false,
+        "JsReturnType": "object",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "subscribedEventNames",
+        "type": "array",
+        "required": false,
+        "JsReturnType": "array"
+      },
+      {
+        "name": "tablet",
+        "required": false,
+        "type": "style-config",
+        "JsReturnType": "style-config"
+      },
+      {
+        "name": "tooltip",
+        "required": false
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "validate",
+        "type": "object",
+        "required": false,
+        "JsReturnType": "object"
+      },
+      {
+        "name": "version",
+        "type": "number",
+        "required": false,
+        "JsReturnType": "number"
+      },
+      {
+        "name": "width",
+        "required": false
+      },
+      {
+        "name": "wrapperStyle",
+        "type": "script",
+        "desc": "Return a React CSSProperties object applied to the outer wrapper.",
+        "required": false,
+        "JsReturnType": "object",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ],
+        "keyCase": "camel",
+        "valueType": "string"
+      },
+      {
+        "name": "customStyle",
+        "type": "script",
+        "desc": "Return a React CSSProperties object. Use camelCase keys and quoted string values.",
+        "required": false,
+        "JsReturnType": "object",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "value",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ],
+        "keyCase": "camel",
+        "valueType": "string"
       }
-    },
-    "constraints": {
-      "customStyle": {
-        "keyCase": "camel",
-        "valueType": "string"
-      },
-      "style": {
-        "keyCase": "camel",
-        "valueType": "string"
-      },
-      "wrapperStyle": {
-        "keyCase": "camel",
-        "valueType": "string"
-      }
-    }
+    ]
   },
   "_formSettings": {
     "props": [
-      "access",
-      "colon",
-      "dataLoaderType",
-      "dataLoadersSettings",
-      "dataSubmitterType",
-      "dataSubmittersSettings",
-      "deleteUrl",
-      "excludeFormFieldsInPayload",
-      "fieldsToFetch",
-      "getUrl",
-      "initialValues",
-      "isSettingsForm",
-      "labelCol",
-      "layout",
-      "modelType",
-      "onAfterDataLoad",
-      "onBeforeDataLoad",
-      "onBeforeSubmit",
-      "onDataLoaded",
-      "onInitialized",
-      "onPrepareSubmitData",
-      "onSubmitFailed",
-      "onSubmitSuccess",
-      "onUpdate",
-      "onValuesUpdate",
-      "permissions",
-      "postUrl",
-      "preparedValues",
-      "putUrl",
-      "size",
-      "version",
-      "wrapperCol"
-    ],
-    "types": {
-      "layout": "string",
-      "colon": "boolean",
-      "labelCol": "object",
-      "wrapperCol": "object",
-      "size": "string",
-      "isSettingsForm": "boolean",
-      "permissions": "array",
-      "version": "number",
-      "fieldsToFetch": "array",
-      "excludeFormFieldsInPayload": "string",
-      "postUrl": "string",
-      "putUrl": "string",
-      "deleteUrl": "string",
-      "getUrl": "string",
-      "initialValues": "array",
-      "preparedValues": "script",
-      "onInitialized": "script",
-      "onDataLoaded": "script",
-      "onUpdate": "script",
-      "dataLoaderType": "string",
-      "dataLoadersSettings": "object",
-      "dataSubmitterType": "string",
-      "dataSubmittersSettings": "object",
-      "onBeforeDataLoad": "script",
-      "onAfterDataLoad": "script",
-      "onValuesUpdate": "script",
-      "onPrepareSubmitData": "script",
-      "onBeforeSubmit": "script",
-      "onSubmitSuccess": "script",
-      "onSubmitFailed": "script"
-    },
-    "scripts": {
-      "onInitialized": {
-        "returns": "void",
+      {
+        "name": "access",
+        "required": false
+      },
+      {
+        "name": "colon",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "dataLoaderType",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "dataLoadersSettings",
+        "type": "object",
+        "required": false,
+        "JsReturnType": "object"
+      },
+      {
+        "name": "dataSubmitterType",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "dataSubmittersSettings",
+        "type": "object",
+        "required": false,
+        "JsReturnType": "object"
+      },
+      {
+        "name": "deleteUrl",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "excludeFormFieldsInPayload",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "fieldsToFetch",
+        "type": "array",
+        "required": false,
+        "JsReturnType": "array"
+      },
+      {
+        "name": "getUrl",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "initialValues",
+        "type": "array",
+        "required": false,
+        "JsReturnType": "array"
+      },
+      {
+        "name": "isSettingsForm",
+        "type": "boolean",
+        "required": false,
+        "JsReturnType": "boolean"
+      },
+      {
+        "name": "labelCol",
+        "type": "object",
+        "required": false,
+        "JsReturnType": "object"
+      },
+      {
+        "name": "layout",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "modelType",
+        "required": false
+      },
+      {
+        "name": "onAfterDataLoad",
+        "type": "script",
+        "desc": "Called after form data has been fetched and set.",
+        "required": false,
+        "JsReturnType": "void",
         "async": false,
         "context": [
           "data",
@@ -437,11 +747,14 @@
           "http",
           "moment",
           "setFormData"
-        ],
-        "description": "Called once when the form is initialised."
+        ]
       },
-      "onDataLoaded": {
-        "returns": "void",
+      {
+        "name": "onBeforeDataLoad",
+        "type": "script",
+        "desc": "Called before form data is fetched.",
+        "required": false,
+        "JsReturnType": "void",
         "async": false,
         "context": [
           "data",
@@ -453,75 +766,14 @@
           "http",
           "moment",
           "setFormData"
-        ],
-        "description": "Called after form data is loaded."
+        ]
       },
-      "onUpdate": {
-        "returns": "void",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called when the form updates."
-      },
-      "onValuesUpdate": {
-        "returns": "void",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called when any field value changes."
-      },
-      "onBeforeDataLoad": {
-        "returns": "void",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called before form data is fetched."
-      },
-      "onAfterDataLoad": {
-        "returns": "void",
-        "async": false,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called after form data has been fetched and set."
-      },
-      "onPrepareSubmitData": {
-        "returns": "object",
+      {
+        "name": "onBeforeSubmit",
+        "type": "script",
+        "desc": "Called before the form submits. Must be async.",
+        "required": false,
+        "JsReturnType": "void",
         "async": true,
         "context": [
           "data",
@@ -533,43 +785,14 @@
           "http",
           "moment",
           "setFormData"
-        ],
-        "description": "Return the final payload object to submit. Must be async."
+        ]
       },
-      "onBeforeSubmit": {
-        "returns": "void",
-        "async": true,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called before the form submits. Must be async."
-      },
-      "onSubmitSuccess": {
-        "returns": "void",
-        "async": true,
-        "context": [
-          "data",
-          "formData",
-          "form",
-          "contexts",
-          "globalState",
-          "formMode",
-          "http",
-          "moment",
-          "setFormData"
-        ],
-        "description": "Called after a successful form submission. Must be async."
-      },
-      "onSubmitFailed": {
-        "returns": "void",
+      {
+        "name": "onDataLoaded",
+        "type": "script",
+        "desc": "Called after form data is loaded.",
+        "required": false,
+        "JsReturnType": "void",
         "async": false,
         "context": [
           "data",
@@ -581,11 +804,14 @@
           "http",
           "moment",
           "setFormData"
-        ],
-        "description": "Called when form submission fails."
+        ]
       },
-      "preparedValues": {
-        "returns": "object",
+      {
+        "name": "onInitialized",
+        "type": "script",
+        "desc": "Called once when the form is initialised.",
+        "required": false,
+        "JsReturnType": "void",
         "async": false,
         "context": [
           "data",
@@ -597,9 +823,859 @@
           "http",
           "moment",
           "setFormData"
-        ],
-        "description": "Return the prepared values object before display."
+        ]
+      },
+      {
+        "name": "onPrepareSubmitData",
+        "type": "script",
+        "desc": "Return the final payload object to submit. Must be async.",
+        "required": false,
+        "JsReturnType": "object",
+        "async": true,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "onSubmitFailed",
+        "type": "script",
+        "desc": "Called when form submission fails.",
+        "required": false,
+        "JsReturnType": "void",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "onSubmitSuccess",
+        "type": "script",
+        "desc": "Called after a successful form submission. Must be async.",
+        "required": false,
+        "JsReturnType": "void",
+        "async": true,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "onUpdate",
+        "type": "script",
+        "desc": "Called when the form updates.",
+        "required": false,
+        "JsReturnType": "void",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "onValuesUpdate",
+        "type": "script",
+        "desc": "Called when any field value changes.",
+        "required": false,
+        "JsReturnType": "void",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "permissions",
+        "type": "array",
+        "required": false,
+        "JsReturnType": "array"
+      },
+      {
+        "name": "postUrl",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "preparedValues",
+        "type": "script",
+        "desc": "Return the prepared values object before display.",
+        "required": false,
+        "JsReturnType": "object",
+        "async": false,
+        "context": [
+          "data",
+          "formData",
+          "form",
+          "contexts",
+          "globalState",
+          "formMode",
+          "http",
+          "moment",
+          "setFormData"
+        ]
+      },
+      {
+        "name": "putUrl",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "size",
+        "type": "string",
+        "required": false,
+        "JsReturnType": "string"
+      },
+      {
+        "name": "version",
+        "type": "number",
+        "required": false,
+        "JsReturnType": "number"
+      },
+      {
+        "name": "wrapperCol",
+        "type": "object",
+        "required": false,
+        "JsReturnType": "object"
       }
+    ]
+  },
+  "_types": {
+    "action-config": {
+      "desc": "Configures an action to execute. Identified by _type: \"action-config\".",
+      "shape": [
+        {
+          "name": "_type",
+          "type": "string",
+          "required": true,
+          "value": "action-config",
+          "desc": "Discriminator — always \"action-config\"."
+        },
+        {
+          "name": "actionName",
+          "type": "string",
+          "required": true,
+          "desc": "Name of the action to execute (e.g. \"Submit\", \"Navigate\", \"Execute Script\")."
+        },
+        {
+          "name": "actionOwner",
+          "type": "string",
+          "required": true,
+          "desc": "Namespace/owner of the action (e.g. \"shesha.form\", \"shesha.common\")."
+        },
+        {
+          "name": "handleFail",
+          "type": "boolean",
+          "required": false,
+          "desc": "When true, onFail contains the failure handler action."
+        },
+        {
+          "name": "handleSuccess",
+          "type": "boolean",
+          "required": false,
+          "desc": "When true, onSuccess contains the success handler action."
+        },
+        {
+          "name": "onSuccess",
+          "type": "action-config",
+          "required": false,
+          "desc": "Action to execute on success. Present when handleSuccess is true."
+        },
+        {
+          "name": "onFail",
+          "type": "action-config",
+          "required": false,
+          "desc": "Action to execute on failure. Present when handleFail is true."
+        }
+      ],
+      "staticOwners": {
+        "shesha.common": {
+          "ownerLabel": "Common",
+          "actions": [
+            "Execute Script",
+            "Show Message",
+            "Sign In",
+            "Show Confirmation Dialog",
+            "Show Dialog",
+            "Close Dialog",
+            "API Call",
+            "Navigate"
+          ]
+        },
+        "shesha.form": {
+          "ownerLabel": "Form",
+          "ownerIsDynamic": true,
+          "desc": "ownerUid is always shesha.form but owner (display name) is the form name.",
+          "actions": [
+            "Start Edit",
+            "Cancel Edit",
+            "Submit",
+            "Reset",
+            "Refresh",
+            "Validate",
+            "Set validation errors",
+            "Reset validation errors"
+          ]
+        },
+        "shesha.configurationFramework": {
+          "ownerLabel": "Configuration Framework",
+          "actions": [
+            "Export items",
+            "Import items",
+            "Download as JSON"
+          ]
+        }
+      },
+      "componentActions": {
+        "desc": "Registered per component instance. Owner equals the component name property at runtime.",
+        "components": {
+          "subForm": [
+            "Get form data",
+            "Post form data",
+            "Update form data"
+          ],
+          "drawer": [
+            "Open drawer",
+            "Close drawer"
+          ],
+          "wizard": [
+            "Back",
+            "Next",
+            "Cancel",
+            "Close",
+            "Done",
+            "Reset Steps",
+            "Validate"
+          ],
+          "datatable": [
+            "Refresh table",
+            "Export to Excel",
+            "Toggle Advanced Filter",
+            "Toggle Columns Selector"
+          ],
+          "datalist": [
+            "Add new item (if allowed)"
+          ],
+          "calendar": [
+            "Refresh"
+          ],
+          "permissionedObjectsTree": [
+            "Update item",
+            "Set grouping",
+            "Set search text"
+          ],
+          "permissionsTree": [
+            "NewPermission",
+            "Update item",
+            "Create root",
+            "Create child",
+            "Delete item"
+          ],
+          "debugPanel": [
+            "Toggle debug panel"
+          ]
+        }
+      }
+    },
+    "style-config": {
+      "desc": "Responsive style container for a breakpoint (desktop / mobile / tablet). May also contain component-specific visual props (e.g. buttonType on button).",
+      "shape": [
+        {
+          "name": "border",
+          "type": "border-config",
+          "required": false
+        },
+        {
+          "name": "background",
+          "type": "background-config",
+          "required": false
+        },
+        {
+          "name": "font",
+          "type": "font-config",
+          "required": false
+        },
+        {
+          "name": "dimensions",
+          "type": "dimensions-config",
+          "required": false
+        },
+        {
+          "name": "shadow",
+          "type": "shadow-config",
+          "required": false
+        },
+        {
+          "name": "stylingBox",
+          "type": "string",
+          "required": false,
+          "desc": "JSON string of additional inline styles."
+        },
+        {
+          "name": "enableStyleOnReadonly",
+          "type": "boolean",
+          "required": false,
+          "desc": "Apply styles even when the component is readonly."
+        },
+        {
+          "name": "tag",
+          "type": "tag-style",
+          "required": false,
+          "desc": "Tag styling for dropdown and tag-mode components."
+        }
+      ]
+    },
+    "border-config": {
+      "desc": "Border and border-radius configuration.",
+      "shape": [
+        {
+          "name": "hideBorder",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "radiusType",
+          "type": "string",
+          "required": false,
+          "options": [
+            "all",
+            "custom"
+          ]
+        },
+        {
+          "name": "borderType",
+          "type": "string",
+          "required": false,
+          "options": [
+            "all",
+            "custom"
+          ]
+        },
+        {
+          "name": "border",
+          "type": "object",
+          "required": false,
+          "desc": "{ all, top, bottom, left, right } — each side: { width: string, style: string, color: string }."
+        },
+        {
+          "name": "radius",
+          "type": "object",
+          "required": false,
+          "desc": "{ all: number } or { topLeft, topRight, bottomLeft, bottomRight } in px."
+        }
+      ]
+    },
+    "background-config": {
+      "desc": "Background configuration supporting color, image, and gradient.",
+      "shape": [
+        {
+          "name": "type",
+          "type": "string",
+          "required": false,
+          "options": [
+            "color",
+            "image",
+            "gradient",
+            "none"
+          ]
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "required": false,
+          "desc": "CSS color value. Used when type is \"color\"."
+        },
+        {
+          "name": "repeat",
+          "type": "string",
+          "required": false,
+          "options": [
+            "no-repeat",
+            "repeat",
+            "repeat-x",
+            "repeat-y"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "string",
+          "required": false,
+          "options": [
+            "auto",
+            "cover",
+            "contain"
+          ]
+        },
+        {
+          "name": "position",
+          "type": "string",
+          "required": false,
+          "options": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right"
+          ]
+        },
+        {
+          "name": "gradient",
+          "type": "object",
+          "required": false,
+          "desc": "{ direction: string, colors: object } for gradient backgrounds."
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "required": false,
+          "desc": "URL for image backgrounds."
+        },
+        {
+          "name": "storedFile",
+          "type": "object",
+          "required": false,
+          "desc": "{ id: string | null } reference to a stored file."
+        },
+        {
+          "name": "uploadFile",
+          "type": "object",
+          "required": false,
+          "desc": "Uploaded file object for image backgrounds."
+        }
+      ]
+    },
+    "font-config": {
+      "desc": "Typography configuration.",
+      "shape": [
+        {
+          "name": "type",
+          "type": "string",
+          "required": false,
+          "desc": "Font family name (e.g. \"Segoe UI\")."
+        },
+        {
+          "name": "align",
+          "type": "string",
+          "required": false,
+          "options": [
+            "left",
+            "center",
+            "right",
+            "justify"
+          ]
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "required": false,
+          "desc": "Font size in px."
+        },
+        {
+          "name": "weight",
+          "type": "string",
+          "required": false,
+          "desc": "Font weight (e.g. \"400\", \"700\")."
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "required": false,
+          "desc": "CSS color value."
+        }
+      ]
+    },
+    "dimensions-config": {
+      "desc": "Width and height constraints — all values are CSS strings (e.g. \"auto\", \"100px\", \"50%\").",
+      "shape": [
+        {
+          "name": "width",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "height",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "minHeight",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "maxHeight",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "minWidth",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "maxWidth",
+          "type": "string",
+          "required": false
+        }
+      ]
+    },
+    "shadow-config": {
+      "desc": "Box shadow configuration.",
+      "shape": [
+        {
+          "name": "offsetX",
+          "type": "number",
+          "required": false,
+          "desc": "Horizontal shadow offset in px."
+        },
+        {
+          "name": "offsetY",
+          "type": "number",
+          "required": false,
+          "desc": "Vertical shadow offset in px."
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "required": false,
+          "desc": "CSS color value."
+        },
+        {
+          "name": "blurRadius",
+          "type": "number",
+          "required": false,
+          "desc": "Blur radius in px."
+        },
+        {
+          "name": "spreadRadius",
+          "type": "number",
+          "required": false,
+          "desc": "Spread radius in px."
+        }
+      ]
+    },
+    "button-group-item": {
+      "desc": "An entry in a buttonGroup items array. itemType discriminates between a button (\"item\") and a dropdown group (\"group\").",
+      "shape": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "itemType",
+          "type": "string",
+          "required": true,
+          "options": [
+            "item",
+            "group"
+          ],
+          "desc": "Discriminator: \"item\" = button/separator/dynamic; \"group\" = nested dropdown."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "sortOrder",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "buttonType",
+          "type": "string",
+          "required": false,
+          "options": [
+            "default",
+            "primary",
+            "ghost",
+            "dashed",
+            "link",
+            "text"
+          ]
+        },
+        {
+          "name": "editMode",
+          "type": "string",
+          "required": false,
+          "options": [
+            "inherited",
+            "edit",
+            "readonly"
+          ]
+        },
+        {
+          "name": "hidden",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "permissions",
+          "type": "array",
+          "required": false
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "required": false,
+          "desc": "Ant Design icon name (e.g. \"SearchOutlined\")."
+        },
+        {
+          "name": "iconPosition",
+          "type": "string",
+          "required": false,
+          "options": [
+            "start",
+            "end"
+          ]
+        },
+        {
+          "name": "tooltip",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "danger",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "ghost",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "block",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "isDynamic",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "size",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "background",
+          "type": "background-config",
+          "required": false
+        },
+        {
+          "name": "font",
+          "type": "font-config",
+          "required": false
+        },
+        {
+          "name": "dimensions",
+          "type": "dimensions-config",
+          "required": false
+        },
+        {
+          "name": "border",
+          "type": "border-config",
+          "required": false
+        },
+        {
+          "name": "shadow",
+          "type": "shadow-config",
+          "required": false
+        },
+        {
+          "name": "itemSubType",
+          "type": "string",
+          "required": false,
+          "options": [
+            "button",
+            "separator",
+            "line",
+            "dynamic"
+          ],
+          "desc": "Present when itemType is \"item\"."
+        },
+        {
+          "name": "actionConfiguration",
+          "type": "action-config",
+          "required": false,
+          "desc": "Present when itemSubType is \"button\"."
+        },
+        {
+          "name": "dividerWidth",
+          "type": "string",
+          "required": false,
+          "desc": "Present when itemSubType is \"separator\" or \"line\"."
+        },
+        {
+          "name": "dividerColor",
+          "type": "string",
+          "required": false,
+          "desc": "Present when itemSubType is \"separator\" or \"line\"."
+        },
+        {
+          "name": "dynamicItemsConfiguration",
+          "type": "object",
+          "required": false,
+          "desc": "Present when itemSubType is \"dynamic\"."
+        },
+        {
+          "name": "hideWhenEmpty",
+          "type": "boolean",
+          "required": false,
+          "desc": "Present when itemType is \"group\"."
+        },
+        {
+          "name": "childItems",
+          "type": "array",
+          "required": false,
+          "arrayItemType": "button-group-item",
+          "desc": "Nested items. Present when itemType is \"group\". Recursive."
+        }
+      ]
+    },
+    "tag-style": {
+      "desc": "Style configuration for dropdown tags — border, background, font, dimensions, shadow.",
+      "shape": [
+        {
+          "name": "border",
+          "type": "border-config",
+          "required": false
+        },
+        {
+          "name": "background",
+          "type": "background-config",
+          "required": false
+        },
+        {
+          "name": "font",
+          "type": "font-config",
+          "required": false
+        },
+        {
+          "name": "dimensions",
+          "type": "dimensions-config",
+          "required": false
+        },
+        {
+          "name": "shadow",
+          "type": "shadow-config",
+          "required": false
+        },
+        {
+          "name": "stylingBox",
+          "type": "string",
+          "required": false,
+          "desc": "JSON string of additional inline styles."
+        }
+      ]
+    },
+    "label-value-item": {
+      "desc": "A selectable option item (ILabelValue). Used by dropdown, checkboxGroup and radio items arrays.",
+      "shape": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "desc": "Unique identifier for the item."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true,
+          "desc": "Display text shown to the user."
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "desc": "The value stored on the form."
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "required": false,
+          "desc": "CSS color for the tag/badge."
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "required": false,
+          "desc": "Ant Design icon name (e.g. \"DownCircleOutlined\")."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "desc": "Optional description shown beneath the label."
+        }
+      ]
+    },
+    "reference-list-id": {
+      "desc": "Identifies a reference list (IReferenceListIdentifier).",
+      "shape": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "desc": "Fully qualified name of the reference list (e.g. \"Boxfusion.Enums.Role\")."
+        },
+        {
+          "name": "module",
+          "type": "string",
+          "required": false,
+          "desc": "Module the reference list belongs to. Null for the current module."
+        }
+      ]
     }
   }
 }

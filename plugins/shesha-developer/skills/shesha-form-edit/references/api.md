@@ -245,3 +245,114 @@ Returns `result.items[]` with `{ id, name, label, module: {...} }`.
 | `Markup is not valid JSON` | The string you sent isn't parseable | Re-stringify; ensure no truncation in the curl `-d @file` form |
 | Empty `result` from GetByName | Form doesn't exist under that name/module | Verify via `GetAll` |
 | `result: null` on UpdateMarkup but `success: true` | Normal — endpoint returns void | No action |
+
+---
+
+## 10. Fetch entity metadata (`/Metadata/Get`)
+
+Used by Step 1.5 of the skill to validate `propertyName` references against the actual entity. Try the `app` namespace first; fall back to `Shesha` if it 404s:
+
+```bash
+# Primary
+curl -s -G "$BASE_URL/api/services/app/Metadata/Get" \
+  --data-urlencode "container=PBF.MembershipManagement.Domain.Domain.Member" \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+
+# Fallback (older / different routing)
+curl -s -G "$BASE_URL/api/services/Shesha/Metadata/Get" \
+  --data-urlencode "container=PBF.MembershipManagement.Domain.Domain.Member" \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
+```
+
+Expected response (ABP envelope; relevant fields):
+
+```json
+{
+  "result": {
+    "containerName": "PBF.MembershipManagement.Domain.Domain.Member",
+    "entityFullName": "PBF.MembershipManagement.Domain.Domain.Member",
+    "properties": [
+      {
+        "path": "firstName",
+        "name": "firstName",
+        "label": "First Name",
+        "dataType": "string",
+        "required": false,
+        "readOnly": false,
+        "referenceListName": null,
+        "referenceListModule": null,
+        "entityType": null
+      }
+    ]
+  }
+}
+```
+
+Save raw response to `.claude/cache/shesha-form-edit/metadata/<entity>.raw.json`, then distill:
+
+```bash
+node .claude/skills/shesha-form-edit/scripts/summarize.js \
+  .claude/cache/shesha-form-edit/metadata/Member.raw.json \
+  --type metadata \
+  --out .claude/cache/shesha-form-edit/metadata/Member.summary.md
+```
+
+Validation pass: for every input component in the edit, confirm `propertyName` matches a `properties[].path` (top-level only — nested-path validation is out of scope). Mismatches must be surfaced to the user before push.
+
+**TTL**: 24 hours. Use `--refresh-cache` to force a re-fetch + re-distill. Invalidate manually after running new migrations or model-type changes.
+
+---
+
+## 11. Round-trip verify (post-push)
+
+Step 8 of the skill. Re-fetch the form just pushed and diff against the markup we sent:
+
+```bash
+curl -s -G "$BASE_URL/api/services/Shesha/FormConfiguration/GetJson" \
+  --data-urlencode "id=$FORM_ID" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  > /tmp/form-after.json
+```
+
+Then in Node:
+
+```js
+const sent = JSON.parse(fs.readFileSync('/tmp/form-sent.json', 'utf8'));
+const after = JSON.parse(JSON.parse(fs.readFileSync('/tmp/form-after.json', 'utf8')).result.markup);
+// Walk both trees in component-id order; surface any property whose value differs.
+```
+
+For anonymous forms, also confirm the envelope: re-fetch via `GetByName` and assert `result.access === 5`. The `Create` endpoint may not honor `access` on initial create; on mismatch, call `UpdateMarkup` once more with `access: 5, permissions: []` and re-verify.
+
+Common server normalizations to ignore (not bugs): re-ordered keys inside an object, whitespace inside string-encoded `stylingBox` values, `null` → `undefined` collapsing on optional fields. Anything else — surface to the user.
+
+---
+
+## 12. Browser smoke via the playwright skill
+
+Step 9 of the skill. Invoke as:
+
+```
+Skill(skill="playwright", args="<directive>")
+```
+
+### Directive template
+
+> Open `<FRONTEND_URL>/<no-auth|dynamic>/<MODULE>/<FORM_NAME>` in a fresh browser context.
+> If path is `/dynamic/...`: first POST `/api/TokenAuth/Authenticate` with `admin`/`123qwe` and set the resulting token in `localStorage.accessToken` before navigating.
+> Wait for the form to render (selector `.sha-form` or 5s timeout, whichever comes first).
+> Capture: full-page screenshot, all console messages with level `error` or `warning`, all network responses with `status >= 400`.
+> Then click the primary action button (if any) and capture again.
+> Report: a one-paragraph summary, the screenshot path, and any captured errors / 4xx-5xx network responses verbatim.
+
+### Frontend URL detection
+
+The PBF project has two front-end apps:
+- `adminportal/` — typical dev port `http://localhost:3000`
+- `publicportal/` — typical dev port `http://localhost:3001`
+
+Read the actual port from `<app>/.env*` (e.g. `PORT=3001`) or `<app>/package.json` `scripts.dev`. Anonymous forms (`access: 5`) usually live in `publicportal`; authenticated forms in `adminportal`. If neither is running, skip the smoke step and warn the user.
+
+### Failure handling
+
+Any captured error → consult [debug.md](debug.md) before guessing. Never silently re-edit and re-push. If the smoke step itself errors out (browser can't connect), warn the user and offer to skip via `--no-browser`.

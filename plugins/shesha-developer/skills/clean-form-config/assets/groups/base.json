@@ -720,6 +720,52 @@
         "keyCase": "camel",
         "valueType": "string"
       }
+    ],
+    "scriptRules": [
+      {
+        "id": "no-window-location",
+        "severity": "error",
+        "detect": "window\\.location",
+        "message": "window.location is unavailable in Shesha — use application.navigator.navigateToUrl() or a Navigate actionConfiguration instead",
+        "fix": "manual"
+      },
+      {
+        "id": "no-console-log",
+        "severity": "warning",
+        "detect": "console\\.log\\s*\\(",
+        "message": "Remove debug console.log calls before deploying",
+        "fix": "auto",
+        "fixNote": "Handled by Step 4b"
+      },
+      {
+        "id": "no-global-state",
+        "severity": "error",
+        "detect": "\\bglobalState\\b",
+        "message": "globalState is deprecated — use contexts.appContext for app-wide state or pageContext for inter-page state",
+        "fix": "manual"
+      },
+      {
+        "id": "no-iife",
+        "severity": "warning",
+        "detect": "\\(\\s*(?:async\\s+)?function\\s*\\(|\\(\\s*(?:async\\s*)?\\(\\s*\\)\\s*=>",
+        "message": "IIFEs are unnecessary — write the function body directly as the script body without the outer wrapping parentheses and call site",
+        "fix": "manual"
+      },
+      {
+        "id": "no-then-chain",
+        "severity": "warning",
+        "detect": "\\.then\\s*\\(",
+        "message": "Replace .then() chains with async/await + try/catch for consistency with Shesha patterns",
+        "fix": "manual",
+        "fixNote": "Handled by Step 4j"
+      },
+      {
+        "id": "no-promise-constructor",
+        "severity": "warning",
+        "detect": "new\\s+Promise\\s*\\(",
+        "message": "Avoid the Promise constructor anti-pattern — use async/await directly instead",
+        "fix": "manual"
+      }
     ]
   },
   "_formSettings": {

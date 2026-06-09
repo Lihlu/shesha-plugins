@@ -377,6 +377,76 @@ Output format per finding:
 
 ---
 
+## Step 4k: Apply scriptRules from base.json
+
+Read `base.base.scriptRules` (loaded in Step 3). Walk all JS code strings (same set as Step 4g). For each rule, test its `detect` regex against each string.
+
+Skip rules where `fix === "auto"` — these are already handled by dedicated steps (`no-console-log` by Step 4b, `no-then-chain` by Step 4j).
+
+For each match of a `fix: "manual"` rule, record: component id, type, property key, matched text excerpt, rule `id`, and rule `message`. Tag by severity:
+- `severity: "error"` → `[ERROR]`
+- `severity: "warning"` → `[WARNING]`
+
+Output format per finding:
+```
+[ERROR] no-window-location
+  Component: <id> (<type>)
+  Property:  <key>
+  Match:     <matched excerpt>
+  Fix:       use application.navigator.navigateToUrl() instead
+
+[ERROR] no-global-state
+  Component: <id> (<type>)
+  Property:  <key>
+  Match:     globalState.selectedId
+  Fix:       use contexts.appContext.selectedId instead
+
+[WARNING] no-iife
+  Component: <id> (<type>)
+  Property:  <key>
+  Match:     (function() { ... })()
+  Fix:       remove the outer IIFE wrapper — write the body directly as the script
+
+[WARNING] no-promise-constructor
+  Component: <id> (<type>)
+  Property:  <key>
+  Match:     new Promise((resolve, reject) => {
+  Fix:       use async/await directly instead
+```
+
+---
+
+## Step 5k: Present scriptRules findings
+
+If no scriptRules matches were found, skip this section.
+
+Show errors first, then warnings:
+
+```
+Script rule violations (N found):
+  Errors (must fix):
+  • "Submit" (button) [onClickCustom]
+      Rule:  no-window-location
+      Match: window.location.href = '/dynamic/...'
+      Fix:   use application.navigator.navigateToUrl('/dynamic/...') instead
+  • "Panel" (container) [onLoad]
+      Rule:  no-global-state
+      Match: globalState.selectedId
+      Fix:   use contexts.appContext.selectedId instead
+
+  Warnings (recommended fixes):
+  • "Init" (formSettings) [onInitialized]
+      Rule:  no-iife
+      Match: (function() { ... })()
+      Fix:   remove the outer IIFE wrapper
+  • "Submit" (button) [customAction]
+      Rule:  no-promise-constructor
+      Match: new Promise((resolve, reject) => {
+      Fix:   use async/await directly instead
+```
+
+---
+
 ## Step 5: Present the dead property findings
 
 If no dead properties are found in either components or `formSettings`, skip this section.
@@ -594,6 +664,8 @@ Ask the user a **single** confirm prompt covering all findings:
 >   - T API call(s) missing try-catch auto-fixed (M need manual review — listed above)
 >   - U API call(s) missing async handling auto-fixed (P need manual review — listed above)
 >   - V API call(s) using .then() — manual review recommended (listed above)
+  - E script rule error(s) — must fix (listed above)
+  - W script rule warning(s) — recommended fixes (listed above)
 >
 > Proceed? (yes / no / skip-type-fixes)
 
@@ -695,6 +767,14 @@ Async/await needing manual review (not changed):
 API calls using .then() — manual review recommended (not changed):
   • "Submit" (button) [onFinish]: axios.post(...).then(result => {
   • "Load Data" (customComponent) [getData]: getHttp(...).then(data => {
+
+Script rule errors — must fix (not changed):
+  • "Submit" (button) [onClickCustom]: window.location.href = '/dynamic/...'
+  • "Panel" (container) [onLoad]: globalState.selectedId
+
+Script rule warnings — recommended fixes (not changed):
+  • "Init" (formSettings) [onInitialized]: (function() { ... })()
+  • "Submit" (button) [customAction]: new Promise((resolve, reject) => {
 
 Original size:  XX,XXX chars
 Cleaned size:   YY,YYY chars

@@ -25,6 +25,7 @@ Inside any embedded JS string, these are available:
 
 **Forbidden globals** (technically present, but project house rule prohibits):
 - `globalState`, `setGlobalState` — superseded by `contexts.appContext`. See [shared-state.md](shared-state.md).
+- `window.location` — not available inside the Shesha SPA renderer. Use `application.navigator.navigateToUrl(url)` or a `Navigate` `actionConfiguration` instead.
 - `window.localStorage`, `window.sessionStorage` — XSS-readable security hole.
 
 **Do not use `console.log`** — `clean-form-config` strips them; the user runs a hardened build.
@@ -83,6 +84,8 @@ The function holding this code must be `async`. For event-handler-style properti
 - `.then(...).catch(...)` chains — convert to `async`/`await` + `try/catch`.
 - Bare `await` outside an async wrapper — Shesha wraps event scripts but not arbitrary helpers; check the property's context.
 - Unhandled promise (`http.get(...)` without `await` and without `.catch`).
+- `new Promise((resolve, reject) => { ... })` constructor — the Promise constructor anti-pattern. Just declare the function `async` and `await` the call directly.
+- IIFEs (`(function() { ... })()` or `(() => { ... })()`) — the script body is already the function body; the outer wrapper is dead weight and confuses the async/await auto-fixer.
 
 The `clean-form-config` skill auto-fixes missing try/catch and missing async where unambiguous, and flags the rest. Invoke it after any script edit.
 

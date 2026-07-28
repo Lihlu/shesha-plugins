@@ -56,7 +56,7 @@ On Yes: invoke `Skill(skill="frontend-design", ...)` per [references/design.md](
 
 ## Step 1 — Resolve backend URL
 
-Order: **task-supplied context block (always wins)** → `src/*.Web.Host/Properties/launchSettings.json` (`profiles.Project.applicationUrl`) → `src/*.Web.Host/appsettings.json` (`Kestrel:Endpoints:Http:Url`) → fallback `http://localhost:21021`. Strip trailing slash. Store as `$BASE_URL`. Ping `$BASE_URL/swagger/index.html` to confirm reachability; if it fails, stop and tell the user to start the backend.
+Order: **task-supplied context block (always wins)** → **`SHESHA_BACKEND_URL` environment variable** (sandboxed/ephemeral environments where the backend runs in a separate process or pod, not at `localhost`) → `src/*.Web.Host/Properties/launchSettings.json` (`profiles.Project.applicationUrl`) → `src/*.Web.Host/appsettings.json` (`Kestrel:Endpoints:Http:Url`) → fallback `http://localhost:21021`. Strip trailing slash. Store as `$BASE_URL`. Ping `$BASE_URL/swagger/index.html` to confirm reachability; if it fails, stop and tell the user to start the backend.
 
 ## Step 2 — Authenticate as admin
 

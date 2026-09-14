@@ -22,7 +22,7 @@ namespace {Namespace}.Domain.{ConfigName}s.Distribution
         // public bool? {BoolProp} { get; set; }
         // public string {StringProp} { get; set; }
 
-        // --- References to OTHER ConfigurationItemBase entities ---
+        // --- References to OTHER ConfigurationItem entities ---
         // IMPORTANT: Use Name + Module string pairs, NOT Guid IDs.
         // This is the established Shesha framework convention so that
         // exported packages are portable across environments where IDs differ.
@@ -48,11 +48,12 @@ namespace {Namespace}.Domain.{ConfigName}s.Distribution
 }
 ```
 
-The base `DistributedConfigurableItemBase` already includes: `Id`, `OriginId`, `Name`, `Label`, `ItemType`, `Description`, `ModuleName`, `FrontEndApplication`, `VersionNo`, `VersionStatus`, `ParentVersionId`, `Suppress`, `BaseItem`.
+The base `DistributedConfigurableItemBase` already includes: `Id`, `OriginId`, `Name`, `Label`, `ItemType`, `Description`, `ModuleName`, `FrontEndApplication`, `Suppress` and `BaseItem`. Declare only your own properties — the base ones are mapped for you in both directions.
 
 ## §2 Exporter
 
-Converts from entity to distribution DTO and serializes to JSON.
+Derive from `ConfigurableItemExportBase<TItem, TDistributed>`. The framework maps every standard
+property and owns JSON serialisation; you supply only the subclass properties.
 
 ### Interface
 
@@ -71,107 +72,38 @@ namespace {Namespace}.Domain.{ConfigName}s.Distribution
 
 ```csharp
 using Abp.Dependency;
-using Abp.Domain.Repositories;
-using Newtonsoft.Json;
 using Shesha.ConfigurationItems.Distribution;
-using Shesha.Domain;
-using Shesha.Services;
-using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace {Namespace}.Domain.{ConfigName}s.Distribution
 {
-    public class {ConfigName}Export : I{ConfigName}Export, ITransientDependency
+    public class {ConfigName}Export
+        : ConfigurableItemExportBase<{ConfigName}, Distributed{ConfigName}>,
+          I{ConfigName}Export, ITransientDependency
     {
-        private readonly IRepository<{ConfigName}, Guid> _repository;
-        // Inject IStoredFileService only if the entity has StoredFile properties
-        private readonly IStoredFileService _storedFileService;
-
-        public {ConfigName}Export(
-            IRepository<{ConfigName}, Guid> repository,
-            IStoredFileService storedFileService)
-        {
-            _repository = repository;
-            _storedFileService = storedFileService;
-        }
-
         public string ItemType => {ConfigName}.ItemTypeName;
 
-        public async Task<DistributedConfigurableItemBase> ExportItemAsync(Guid id)
+        protected override Task MapCustomPropsAsync({ConfigName} item, Distributed{ConfigName} result)
         {
-            var item = await _repository.GetAsync(id);
-            return await ExportItemAsync(item);
-        }
+            // result.{CustomProp} = item.{CustomProp};
 
-        public async Task<DistributedConfigurableItemBase> ExportItemAsync(
-            ConfigurationItemBase item)
-        {
-            if (item is not {ConfigName} config)
-                throw new ArgumentException(
-                    $"Expected {nameof({ConfigName})}, got {item.GetType().FullName}");
+            // Cross-config-item reference - Name + Module, never the Guid:
+            // result.{Related}Name   = item.{Related}?.Name;
+            // result.{Related}Module = item.{Related}?.Module?.Name;
 
-            var result = new Distributed{ConfigName}
-            {
-                // Base properties (always include all of these)
-                Id = config.Id,
-                Name = config.Name,
-                ModuleName = config.Module?.Name,
-                FrontEndApplication = config.Application?.AppKey,
-                ItemType = config.ItemType,
-                Label = config.Label,
-                Description = config.Description,
-                OriginId = config.Origin?.Id,
-                BaseItem = config.BaseItem?.Id,
-                VersionNo = config.VersionNo,
-                VersionStatus = config.VersionStatus,
-                ParentVersionId = config.ParentVersion?.Id,
-                Suppress = config.Suppress,
-
-                // Custom scalar properties
-                // {CustomProp} = config.{CustomProp},
-
-                // References to other ConfigurationItemBase entities:
-                // Export as Name + Module strings (NOT Guid IDs).
-                // {Related}Name = config.{Related}?.Name,
-                // {Related}Module = config.{Related}?.Module?.Name,
-            };
-
-            // --- StoredFile properties ---
-            // For each StoredFile property, read the file content and encode as base64.
-            // if (config.{FileProp} != null)
-            // {
-            //     result.{FileProp}FileName = config.{FileProp}.FileName;
-            //     result.{FileProp}FileType = config.{FileProp}.FileType;
-            //
-            //     using var stream = await _storedFileService.GetStreamAsync(config.{FileProp});
-            //     if (stream != null)
-            //     {
-            //         using var memoryStream = new MemoryStream();
-            //         await stream.CopyToAsync(memoryStream);
-            //         result.{FileProp}Base64 = Convert.ToBase64String(memoryStream.ToArray());
-            //     }
-            // }
-
-            return result;
-        }
-
-        public async Task WriteToJsonAsync(
-            DistributedConfigurableItemBase item, Stream jsonStream)
-        {
-            var json = JsonConvert.SerializeObject(item, Formatting.Indented);
-            using var writer = new StreamWriter(jsonStream);
-            await writer.WriteAsync(json);
+            return Task.CompletedTask;
         }
     }
 }
 ```
 
-**Note:** When the entity has StoredFile properties, the `ExportItemAsync(ConfigurationItemBase)` method must be `async` (not returning `Task.FromResult`) because reading the file stream is an async operation.
+Make `MapCustomPropsAsync` `async` when you need to await something — reading a `StoredFile`
+stream, for example.
 
 ## §3 Importer
 
-Reads JSON and creates or updates entities in the database.
+Derive from `ConfigurationItemImportBase<TItem, TDistributed>`. The framework finds the existing
+item, resolves the module and front-end app, applies the revision status and deserialises the JSON.
 
 ### Interface
 
@@ -191,162 +123,102 @@ namespace {Namespace}.Domain.{ConfigName}s.Distribution
 ```csharp
 using Abp.Dependency;
 using Abp.Domain.Repositories;
-using Newtonsoft.Json;
 using Shesha.ConfigurationItems.Distribution;
 using Shesha.Domain;
-using Shesha.Domain.ConfigurationItems;
-using Shesha.Services;
-using Shesha.Services.ConfigurationItems;
+using Shesha.Services.ConfigurationItems;   // required for ConfigurationItemImportBase<,>
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace {Namespace}.Domain.{ConfigName}s.Distribution
 {
-    public class {ConfigName}Import : ConfigurationItemImportBase,
-        I{ConfigName}Import, ITransientDependency
+    public class {ConfigName}Import
+        : ConfigurationItemImportBase<{ConfigName}, Distributed{ConfigName}>,
+          I{ConfigName}Import, ITransientDependency
     {
-        private readonly IRepository<{ConfigName}, Guid> _repository;
-        // Inject IStoredFileService only if the entity has StoredFile properties
-        private readonly IStoredFileService _storedFileService;
-        // Inject repositories for referenced ConfigurationItemBase entities
-        // private readonly IRepository<{RelatedConfigItem}, Guid> _{relatedRepo};
-
         public {ConfigName}Import(
             IRepository<Module, Guid> moduleRepo,
             IRepository<FrontEndApp, Guid> frontEndAppRepo,
-            IRepository<{ConfigName}, Guid> repository,
-            IStoredFileService storedFileService
-            // IRepository<{RelatedConfigItem}, Guid> relatedRepo
-        ) : base(moduleRepo, frontEndAppRepo)
+            IRepository<{ConfigName}, Guid> repository
+        ) : base(repository, moduleRepo, frontEndAppRepo)   // note the argument order
         {
-            _repository = repository;
-            _storedFileService = storedFileService;
-            // _{relatedRepo} = relatedRepo;
         }
 
-        public string ItemType => {ConfigName}.ItemTypeName;
+        public override string ItemType => {ConfigName}.ItemTypeName;
 
-        public async Task<ConfigurationItemBase> ImportItemAsync(
-            DistributedConfigurableItemBase item,
+        /// <summary>
+        /// Whether the stored item already matches the incoming one. Standard properties are
+        /// compared by the base class - compare only your own here.
+        /// </summary>
+        protected override Task<bool> CustomPropsAreEqualAsync({ConfigName} item, Distributed{ConfigName} distributedItem)
+        {
+            var equal = true;
+            // equal = item.{CustomProp} == distributedItem.{CustomProp};
+
+            return Task.FromResult(equal);
+        }
+
+        protected override Task MapCustomPropsToItemAsync({ConfigName} item, Distributed{ConfigName} distributedItem)
+        {
+            // item.{CustomProp} = distributedItem.{CustomProp};
+
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Optional. Anything that must happen after the item itself is saved - child rows,
+        /// stored files, calls into other services.
+        /// </summary>
+        protected override Task AfterImportAsync(
+            {ConfigName} item,
+            Distributed{ConfigName} distributedItem,
             IConfigurationItemsImportContext context)
         {
-            if (item is not Distributed{ConfigName} distributed)
-                throw new NotSupportedException(
-                    $"Expected {nameof(Distributed{ConfigName})}, " +
-                    $"got {item.GetType().FullName}");
-
-            var statusToImport = context.ImportStatusAs ?? item.VersionStatus;
-
-            // Match existing item by Name + Module + IsLast
-            var dbItem = await _repository.FirstOrDefaultAsync(x =>
-                x.Name == item.Name
-                && (x.Module == null && item.ModuleName == null
-                    || x.Module != null && x.Module.Name == item.ModuleName)
-                && x.IsLast);
-
-            if (dbItem != null)
-            {
-                await MapPropertiesAsync(distributed, dbItem, context);
-                await _repository.UpdateAsync(dbItem);
-            }
-            else
-            {
-                dbItem = new {ConfigName}();
-                await MapPropertiesAsync(distributed, dbItem, context);
-
-                dbItem.VersionNo = 1;
-                dbItem.Module = await GetModuleAsync(item.ModuleName, context);
-                dbItem.VersionStatus = statusToImport;
-                dbItem.CreatedByImport = context.ImportResult;
-
-                dbItem.Normalize();
-                await _repository.InsertAsync(dbItem);
-            }
-
-            return dbItem;
-        }
-
-        private async Task MapPropertiesAsync(
-            Distributed{ConfigName} source,
-            {ConfigName} target,
-            IConfigurationItemsImportContext context)
-        {
-            // Base properties
-            target.Name = source.Name;
-            target.Module = await GetModuleAsync(source.ModuleName, context);
-            target.Application = await GetFrontEndAppAsync(
-                source.FrontEndApplication, context);
-            target.Label = source.Label;
-            target.Description = source.Description;
-            target.VersionNo = source.VersionNo;
-            target.VersionStatus = source.VersionStatus;
-            target.Suppress = source.Suppress;
-
-            // Custom scalar properties
-            // target.{CustomProp} = source.{CustomProp};
-
-            // References to other ConfigurationItemBase entities:
-            // Resolve from Name + Module strings back to entities.
-            // target.{Related} = !string.IsNullOrWhiteSpace(source.{Related}Name)
-            //     ? await _{relatedRepo}.FirstOrDefaultAsync(x =>
-            //         x.Name == source.{Related}Name
-            //         && (x.Module == null && source.{Related}Module == null
-            //             || x.Module != null && x.Module.Name == source.{Related}Module)
-            //         && x.IsLast)
-            //     : null;
-
-            // --- StoredFile properties ---
-            // Recreate the file from base64 content.
-            // if (!string.IsNullOrWhiteSpace(source.{FileProp}Base64))
-            // {
-            //     var fileBytes = Convert.FromBase64String(source.{FileProp}Base64);
-            //     using var stream = new MemoryStream(fileBytes);
-            //     var storedFile = await _storedFileService.SaveFileAsync(
-            //         stream,
-            //         source.{FileProp}FileName,
-            //         file => file.FileType = source.{FileProp}FileType);
-            //     target.{FileProp} = storedFile;
-            // }
-            // else
-            // {
-            //     target.{FileProp} = null;
-            // }
-        }
-
-        public async Task<DistributedConfigurableItemBase> ReadFromJsonAsync(
-            Stream jsonStream)
-        {
-            using var reader = new StreamReader(jsonStream);
-            var json = await reader.ReadToEndAsync();
-
-            var result = JsonConvert.DeserializeObject<Distributed{ConfigName}>(json)
-                ?? throw new Exception(
-                    $"Failed to deserialize {nameof({ConfigName})} from JSON");
-
-            return result;
+            return Task.CompletedTask;
         }
     }
 }
 ```
 
+### What changed in 0.46.0
+
+The old importer was hand-rolled and no longer compiles. Deleting it is most of the work.
+
+| Was your responsibility | Now |
+|---|---|
+| `ImportItemAsync(DistributedConfigurableItemBase, context)` | base class |
+| Finding the existing row via `Name + Module + IsLast` | base class |
+| Setting `VersionNo` / `VersionStatus` / `CreatedByImport` | gone — versioning is on revisions |
+| Calling `Normalize()` | base class owns `Origin` |
+| `ReadFromJsonAsync` / `WriteToJsonAsync` | base class |
+| Mapping the standard properties | base class |
+
+**`IsLast` has no replacement.** It existed only to pick the current row out of sibling version
+rows; an item is now a single row with its versions in `ConfigurationItemRevision`. Delete the
+predicate rather than looking for an equivalent — including in cross-config-item lookups.
+
+**Watch the `using`.** Without `using Shesha.Services.ConfigurationItems;` the compiler reports
+`ConfigurationItemImportBase<,>` as missing even though the assembly is referenced, because the
+non-generic base of the same name lives elsewhere.
+
+**Watch the constructor order.** The base takes `(repository, moduleRepo, frontEndAppRepo)` while
+the conventional parameter order lists the module repo first — easy to transpose.
+
 ## Key Points
 
 - **`ITransientDependency`** — both exporter and importer must implement this.
-- **Match by Name + Module + IsLast** — this is how the importer finds existing items.
-- **`Normalize()`** — call on new items only; sets Origin to self-reference.
-- **`context.ImportStatusAs`** — allows the import caller to override the version status.
-- **`GetModuleAsync` / `GetFrontEndAppAsync`** — inherited from `ConfigurationItemImportBase`; resolves or creates modules/apps as needed.
+- **Item lookup, module resolution and revision status are the base class's job** — do not re-implement them.
+- **`IsLast` no longer exists** — an item is a single row; delete the predicate rather than replacing it.
+- **`Normalize()` is no longer yours to call** — the framework owns `Origin`.
 
 ### Cross-Config-Item References (IMPORTANT)
 
-When a configuration item has a property that references **another ConfigurationItemBase entity** (e.g., a `SettingConfiguration` referencing an editor `FormConfiguration`, or an `EntityProperty` referencing a `ReferenceList`):
+When a configuration item has a property that references **another ConfigurationItem entity** (e.g., a `SettingConfiguration` referencing an editor `FormConfiguration`, or an `EntityProperty` referencing a `ReferenceList`):
 
 | Layer | What to do |
 |-------|------------|
 | **Distribution DTO** | Represent the reference as **two string properties**: `{Related}Name` and `{Related}Module`. Do NOT use `Guid?`. |
 | **Exporter** | Map from the entity navigation property: `{Related}Name = entity.{Related}?.Name`, `{Related}Module = entity.{Related}?.Module?.Name`. |
-| **Importer** | Resolve back to the entity using `Name + Module + IsLast` query (same pattern as the main item lookup). |
+| **Importer** | Resolve back to the entity using a `Name + Module` query (no `IsLast` — it no longer exists). |
 
 **Why?** GUIDs are environment-specific — they differ between dev, staging, and production databases. Name + Module pairs are stable identifiers that make exported `.shaconfig` packages portable across environments.
 

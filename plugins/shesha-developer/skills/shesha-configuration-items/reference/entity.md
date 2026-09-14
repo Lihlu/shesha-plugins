@@ -15,15 +15,10 @@ namespace {Namespace}.Domain.{ConfigName}s
     /// </summary>
     [DiscriminatorValue(ItemTypeName)]
     [JoinedProperty("{Prefix}_{ConfigName}s")]
-    public class {ConfigName} : ConfigurationItemBase
+    public class {ConfigName} : ConfigurationItem
     {
         public const string ItemTypeName = "{item-type-name}";
         public override string ItemType => ItemTypeName;
-
-        public {ConfigName}()
-        {
-            VersionStatus = ConfigurationItemVersionStatus.Live;    // Default to live version or else won't be available for export.
-        }
 
 
         // --- Custom properties ---
@@ -72,7 +67,7 @@ namespace {Namespace}.Domain.{ConfigName}s
 
 ## ItemTypeName Convention
 
-Use kebab-case. The value is stored in the `ItemType` column in `Frwk_ConfigurationItems` and used as the folder name in exported `.shaconfig` packages.
+Use kebab-case. The value is stored in the `item_type` column in `frwk.configuration_items` and used as the folder name in exported `.shaconfig` packages.
 
 Examples from real projects:
 - `"leave-type-configs"`
@@ -146,7 +141,7 @@ public virtual JsonEntity ExtensionJson { get; set; }
 ```csharp
 [DiscriminatorValue(ItemTypeName)]
 [JoinedProperty("Leave_LeaveCalendarConfigs")]
-public class LeaveCalendarConfig : ConfigurationItemBase
+public class LeaveCalendarConfig : ConfigurationItem
 {
     public const string ItemTypeName = "leave-calendar-configs";
     public override string ItemType => ItemTypeName;
@@ -166,7 +161,7 @@ public class LeaveCalendarConfig : ConfigurationItemBase
 ```csharp
 [DiscriminatorValue(ItemTypeName)]
 [JoinedProperty("Pmds_PerformanceManagementProcessConfigs")]
-public class PerformanceManagementProcessConfig : ConfigurationItemBase
+public class PerformanceManagementProcessConfig : ConfigurationItem
 {
     public const string ItemTypeName = "performancemanagementprocess-config";
     public override string ItemType => ItemTypeName;

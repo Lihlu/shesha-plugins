@@ -5,11 +5,14 @@ surface the configuration item natively inside Configuration Studio — under **
 create wizard and document editor, the same way built-in item types like Reference Lists and Roles
 work. Ask the user which they want before scaffolding artifact 8; the two are not combined.
 
-Configuration Studio integration only applies to entities extending `ConfigurationItem` (not the
-lighter `ConfigurationItemBase` this skill defaults to) — `ConfigurationItem` carries the revision
-history, `[FixedView]`-driven menu wiring, and generic create/update endpoints Configuration Studio
-depends on. If the entity was scaffolded as a `ConfigurationItemBase` subclass per this skill's
-default template, it needs to extend `ConfigurationItem` instead before this applies.
+Configuration Studio integration applies to entities extending `ConfigurationItem`, which carries
+the revision history, `[FixedView]`-driven menu wiring, and generic create/update endpoints Studio
+depends on.
+
+Before 0.46.0 there were two base classes and only the heavier one worked here. That choice is
+gone — `ConfigurationItemBase` no longer exists, so every configuration item is eligible. An entity
+scaffolded from a pre-0.46.0 template needs its base class changed to `ConfigurationItem` first;
+see [manager.md](manager.md) and [distribution.md](distribution.md) for the rest of that migration.
 
 ## 1. Backend: make it appear in the **New** menu
 

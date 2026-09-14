@@ -21,8 +21,8 @@ Use the MCP tools to create three forms for the configuration item:
 **1. Table/List Form**
 - Entity type: `{FullyQualifiedEntityName}` (e.g., `YourModule.Domain.ApprovalConfigs.ApprovalConfig`)
 - Form type: Table/Index
-- Include columns for: `Name`, `Label`, `Module`, `VersionStatus`, and key custom properties
-- Filter by `IsLast == true` to show only the latest version of each item
+- Include columns for: `Name`, `Label`, `Module`, and key custom properties
+- No version filter is needed. Since 0.46.0 an item is a single row, with its versions held in `ConfigurationItemRevision` — the old `IsLast == true` filter has nothing to filter.
 - Add create and edit actions
 
 **2. Create Form**
@@ -34,7 +34,7 @@ Use the MCP tools to create three forms for the configuration item:
 **3. Details/Edit Form**
 - Entity type: same as above
 - Form type: Details/Edit
-- Include all fields from the create form plus `VersionStatus`
+- Include all fields from the create form. Revision status lives on `ConfigurationItemRevision`, not the item, so surface it read-only via the revision if the screen needs it.
 - Show audit information (CreatedBy, CreationTime)
 
 ### If Shesha MCP is NOT Available
@@ -42,9 +42,9 @@ Use the MCP tools to create three forms for the configuration item:
 Notify the user:
 
 > "Admin forms for `{ConfigName}` need to be created manually through the Shesha Form Designer. The forms should be configured with entity type `{FullyQualifiedEntityName}` and should include these forms:
-> 1. A **table view** (filter by `IsLast == true`) with columns: Name, Label, Module, VersionStatus, {key custom properties}
+> 1. A **table view** with columns: Name, Label, Module, {key custom properties}
 > 2. A **create form** with fields: Name, Label, Description, Module, {all custom properties}
-> 3. A **details/edit form** with all create fields plus VersionStatus and audit info
+> 3. A **details/edit form** with all create fields plus audit info
 >
 > I was unable to create these automatically because the Shesha MCP server is not connected. To create them, open the Shesha Form Designer in your browser and configure the forms manually."
 
@@ -52,12 +52,12 @@ Notify the user:
 
 | Field | Source | Notes |
 |-------|--------|-------|
-| `Name` | `ConfigurationItemBase` | Unique within module. Used for import/export matching. |
-| `Label` | `ConfigurationItemBase` | User-friendly display name. |
-| `Module` | `ConfigurationItemBase` | Dropdown of available modules. |
-| `Description` | `ConfigurationItemBase` | Multiline text area. |
-| `VersionStatus` | `ConfigurationItemBase` | Read-only on edit forms (managed via status transitions). |
-| `IsLast` | `ConfigurationItemBase` | Use as table filter, not as a visible field. |
+| `Name` | `ConfigurationItem` | Unique within module. Used for import/export matching. |
+| `Label` | `ConfigurationItem` | User-friendly display name. |
+| `Module` | `ConfigurationItem` | Dropdown of available modules. |
+| `Description` | `ConfigurationItem` | Multiline text area. |
+
+`VersionStatus` and `IsLast` were removed from the item in 0.46.0 — do not bind to them.
 
 ## Form Naming Convention
 

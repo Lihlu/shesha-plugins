@@ -1,6 +1,6 @@
 ---
 name: shesha-configuration-items
-description: Creates and updates custom configuration items in Shesha framework .NET applications. Scaffolds domain entities extending ConfigurationItemBase, FluentMigrator joined-table migrations, managers, and import/export distribution classes in the Domain layer, plus IoC registration in the Application layer. Use when the user asks to create, scaffold, implement, or update configuration items, configuration types, or configurable settings in a Shesha project. Also use when implementing features from a PRD or specification that require new configuration item types with admin UI, versioning, or import/export support.
+description: Creates and updates custom configuration items in Shesha framework .NET applications. Scaffolds domain entities extending ConfigurationItem, FluentMigrator joined-table migrations, managers, and import/export distribution classes in the Domain layer, plus IoC registration in the Application layer. Use when the user asks to create, scaffold, implement, or update configuration items, configuration types, or configurable settings in a Shesha project. Also use when implementing features from a PRD or specification that require new configuration item types with admin UI, versioning, or import/export support.
 ---
 
 # Shesha Configuration Item Implementation
@@ -71,9 +71,10 @@ Scaffold and manage custom configuration items for a Shesha/.NET/ABP/NHibernate 
 
 | Artifact | Base Class |
 |----------|-----------|
-| Entity | `ConfigurationItemBase` (from `Shesha.Domain`) |
-| Manager | `ConfigurationItemManager<T>` (from `Shesha.ConfigurationItems`) |
-| Importer | `ConfigurationItemImportBase` (from `Shesha.Services.ConfigurationItems`) |
+| Entity | `ConfigurationItem` (from `Shesha.Domain`) |
+| Manager | `ConfigurationItemManager<T>` (from `Shesha.ConfigurationItems`) — override `CopyItemPropertiesAsync` |
+| Exporter | `ConfigurableItemExportBase<TItem, TDistributed>` (from `Shesha.ConfigurationItems.Distribution`) |
+| Importer | `ConfigurationItemImportBase<TItem, TDistributed>` (from `Shesha.Services.ConfigurationItems`) |
 | Distribution DTO | `DistributedConfigurableItemBase` (from `Shesha.ConfigurationItems.Distribution`) |
 
 ### Naming Conventions
@@ -117,7 +118,7 @@ Determine the type of change, then follow the appropriate path:
 
 ```
 - [ ] Step 1: Gather requirements (properties, types, reference lists, relationships)
-- [ ] Step 2: Create entity class extending ConfigurationItemBase (artifact 1)
+- [ ] Step 2: Create entity class extending ConfigurationItem (artifact 1)
 - [ ] Step 3: Create FluentMigrator migration for joined table (artifact 2)
 - [ ] Step 4: Create manager interface and implementation (artifact 3)
 - [ ] Step 5: Create distribution DTO, exporter, and importer (artifacts 4-6)
@@ -132,13 +133,13 @@ Determine the type of change, then follow the appropriate path:
 > forms (artifact 8), or surfaced in Configuration Studio's own **New** menu and document editor,
 > the same way Reference Lists and Roles are (artifact 8b)?"
 
-- **Standalone screen** → [reference/admin-forms.md](reference/admin-forms.md). Works with
-  `ConfigurationItemBase` as scaffolded by this skill's default template.
+- **Standalone screen** → [reference/admin-forms.md](reference/admin-forms.md).
 - **Configuration Studio** → [reference/configuration-studio.md](reference/configuration-studio.md).
-  Requires the entity to extend `ConfigurationItem` (not `ConfigurationItemBase`) — if it was
-  scaffolded per this skill's default template, it needs the base class changed first. Also
-  requires at least one genuine `NotNullable()` own column (see that reference file §1) — do not
+  Requires at least one genuine `NotNullable()` own column (see that reference file §1) — do not
   skip this even if the entity otherwise has no custom properties yet.
+
+Both paths take the same `ConfigurationItem` base class. Before 0.46.0 there were two bases and
+Studio needed the heavier one; that choice no longer exists.
 
 ### Update Existing Config Item Workflow
 
@@ -161,9 +162,9 @@ GET /api/services/app/Entities/GetAll?entityType={FullyQualifiedEntityTypeName}&
 ```
 Expected: `{"success": true, "result": {"totalCount": 0, ...}}`
 
-**2. Verify the polymorphic ConfigurationItemBase query (exercises ALL joined tables):**
+**2. Verify the polymorphic ConfigurationItem query (exercises ALL joined tables):**
 ```
-GET /api/services/app/Entities/GetAll?entityType=Shesha.Domain.ConfigurationItemBase&maxResultCount=1
+GET /api/services/app/Entities/GetAll?entityType=Shesha.Domain.ConfigurationItem&maxResultCount=1
 ```
 Expected: `{"success": true, "result": {"totalCount": N, ...}}` where N > 0
 
@@ -177,14 +178,13 @@ not Configuration Studio is involved.
 
 ### Key Rules
 
-- **Normalize on first version** — call `entity.Normalize()` when creating the first version of an item (in `CopyAsync` and importers). This sets `Origin` to self-reference.
-- **Origin on subsequent versions** — set `Origin = item.Origin` in `CreateNewVersionAsync`.
+- **Versioning is the framework's** — `VersionNo`, `VersionStatus`, `ParentVersion`, `Origin` and `IsLast` moved to `ConfigurationItemRevision` in 0.46.0. Never set them, and never call `Normalize()`.
 - **Virtual properties** — every entity property must be `virtual` for NHibernate.
-- **FK to ConfigurationItems** — the joined table MUST have a FK from `Id` to `Frwk_ConfigurationItems.Id`.
+- **FK to configuration items** — the joined table MUST have a FK from `Id` to `frwk.configuration_items.id` (renamed from `Frwk_ConfigurationItems` in 0.46.0).
 - **FK column prefix** — ALL columns in `[JoinedProperty]` tables MUST use the `{Prefix}_` prefix, including FK columns. NHibernate's convention prefixes every column with the table prefix. Example: table `LB_MyConfigs` → FK column must be `LB_RelatedEntityId`, NOT `RelatedEntityId`.
 - **ITransientDependency** — exporters and importers must implement `ITransientDependency`.
-- **Match by Name + Module** — importers identify existing items by `Name` + `Module.Name` + `IsLast`.
-- **Cross-config-item references use Name + Module, NOT Guid** — when a config item references another `ConfigurationItemBase` entity, the distribution DTO MUST use `string {Related}Name` + `string {Related}Module` pairs. The exporter maps from navigation properties (`entity.Related?.Name`, `entity.Related?.Module?.Name`), and the importer resolves back via `Name + Module + IsLast` query. GUIDs are environment-specific and make packages non-portable. Only internal versioning fields (`OriginId`, `BaseItem`, `ParentVersionId`) use GUIDs. See [reference/distribution.md](reference/distribution.md) §Cross-Config-Item References.
+- **Item lookup is the base class's job** — do not hand-roll a `Name` + `Module` query in the importer, and do not filter on `IsLast`; it no longer exists.
+- **Cross-config-item references use Name + Module, NOT Guid** — when a config item references another `ConfigurationItem` entity, the distribution DTO MUST use `string {Related}Name` + `string {Related}Module` pairs. The exporter maps from navigation properties (`entity.Related?.Name`, `entity.Related?.Module?.Name`), and the importer resolves back via a `Name + Module` query. GUIDs are environment-specific and make packages non-portable. Only internal lineage fields (`OriginId`, `BaseItem`) use GUIDs. See [reference/distribution.md](reference/distribution.md) §Cross-Config-Item References.
 - **Only register what you implement** — skip manager registration if not needed; skip export/import if not needed.
 
 For each step, read the relevant reference file from the artifact catalog above.

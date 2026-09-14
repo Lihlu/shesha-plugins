@@ -2,7 +2,13 @@
 
 ## New Table Migration Template
 
-The joined table shares its `Id` with `Frwk_ConfigurationItems`. The FK is mandatory.
+The joined table shares its `Id` with `frwk.configuration_items`. The FK is mandatory.
+
+> **0.46.0:** the Configuration Items rewrite renamed `Frwk_ConfigurationItems` to
+> `frwk.configuration_items` (schema `frwk`, snake-case columns). A migration written
+> against the old name fails with `Invalid object name` on any database past that
+> rewrite — including migrations authored years earlier, because FluentMigrator runs
+> anything absent from `VersionInfo` regardless of how far ahead the database is.
 
 ```csharp
 using FluentMigrator;
@@ -37,11 +43,11 @@ namespace {Namespace}.Migrations
                 .WithColumn("{Prefix}_{PropName}Ticks").AsInt64().Nullable();
 
             // MANDATORY: FK to base ConfigurationItems table
-            Create.ForeignKey("FK_{Prefix}_{ConfigName}s_Frwk_ConfigurationItems_Id")
+            Create.ForeignKey("FK_{Prefix}_{ConfigName}s_frwk_conf_items_id")
                 .FromTable("{Prefix}_{ConfigName}s")
                 .ForeignColumn("Id")
-                .ToTable("Frwk_ConfigurationItems")
-                .PrimaryColumn("Id");
+                .ToTable("configuration_items").InSchema("frwk")
+                .PrimaryColumn("id");
 
             // Optional: FK columns to other tables
             // IMPORTANT: FK columns in [JoinedProperty] tables MUST also use the {Prefix}_ prefix
@@ -113,10 +119,10 @@ Create.Table("Leave_LeaveTypeConfigs")
     .WithColumn("Leave_PolicyInfo").AsString().Nullable()
     .WithColumn("Leave_ProcessorTypeName").AsString(200).Nullable();
 
-Create.ForeignKey("FK_Leave_LeaveTypeConfigs_Frwk_ConfigurationItems_Id")
+Create.ForeignKey("FK_Leave_LeaveTypeConfigs_frwk_conf_items_id")
     .FromTable("Leave_LeaveTypeConfigs")
     .ForeignColumn("Id")
-    .ToTable("Frwk_ConfigurationItems")
+    .ToTable("configuration_items").InSchema("frwk")
     .PrimaryColumn("Id");
 ```
 

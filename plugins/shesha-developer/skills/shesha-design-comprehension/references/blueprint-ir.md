@@ -35,9 +35,27 @@ Viewport captured:  <w>x<h>      Source:  <probe file / source path / screenshot
 
 ## The eight archetypes (target vocabulary)
 
-The blueprint's `Archetype` must be one of `shesha-form-edit`'s archetypes, so the builder picks the right seed:
+The blueprint's `Archetype` must be one of the eight canonical shapes, so the conductor picks the right builder and the builder picks the right seed:
 `record-detail` · `hub` · `list-card` · `capture` · `dashboard` · `solution-map` · `wizard` · `inline-card`.
-(See `shesha-form-edit/references/archetypes.md` for each one's seed, blocks and default shape.)
+
+**Which builder each archetype routes to** (set in `shesha-claude-designer` SKILL.md Step 4a — walk the STRICT preference order):
+
+| # | Archetype / variant | Builder | Source of components |
+|---|---|---|---|
+| 1 | `list-card` (table) | **`create-crud-form`** | `sample-patient-table.json` |
+| 1 | `list-card` (datalist of cards) | **`create-crud-form`** | `sample-appointment-list.json` + `sample-appointment-list-subform.json` (PAIR) |
+| 1 | `capture` (in-modal create) | **`create-crud-form`** | `sample-patient-create.json` |
+| 1 | `record-detail` | **`create-crud-form`** | `sample-patient-details.json` |
+| 1 | `inline-card` (row-template mini-card) | **`create-crud-form`** | `sample-patient-subform.json` |
+| 2 | `dashboard` · `hub` · `wizard` · `solution-map` (Shesha-form-designer-expressible with EXISTING components) | **`shesha-form-edit`** | blocks + patterns (`shesha-form-edit/references/archetypes.md`) using existing form-designer toolbox |
+| 3 | Any archetype — form-shaped but **MISSING a component** (a specific chart, a rating input, an image annotator, a Kanban card, a signature pad, etc.). Mark the blueprint `Archetype: <shape> — form-config with new component <componentName>` | **`create-custom-component`** THEN **`shesha-form-edit`** | new designer component in a package (enterprise / reporting / workflow), then a form-config that uses it — **stays on the form-configuration road** |
+| 4 (LAST RESORT) | Any archetype — **`custom-page` variant** with a named uncoverable capability (drag-and-drop UIs, integration consoles, marketing landing pages, bespoke data browsers with capabilities that couldn't have been a component). Mark the blueprint `Archetype: <shape> — custom-page variant · reason: <specific-capability>` | `create-custom-page` | plain React + Ant Design; scaffolds `src/screens/<name>/index.tsx` + Next.js route. **Bypasses framework guarantees — use only when the missing capability genuinely cannot be a component.** |
+
+**Preference order — form-configs beat custom pages every time.** A Shesha form-configuration plugs into the framework's data-loader / permissions / validation / dynamic-CRUD / versioning / import-export automatically. A custom React page reimplements every one of those responsibilities by hand. When the blueprint calls for something the existing form-designer can't express, first ask: **is the gap a missing COMPONENT or a missing PARADIGM?** A missing component (a chart type, a rating input, a bespoke calendar cell) → build it via `create-custom-component`, use it inside a form-config. A missing paradigm (an entire drag-and-drop workflow, an integration console with terminal semantics, a marketing landing page with hero + copy + CTAs) → falls to `create-custom-page` and the blueprint header names the paradigm.
+
+**Canonical CRUD ships in the canonical Shesha aesthetic — no styling overlay.** The `create-crud-form` seeds bake in a specific look (grey `#fafafa` pageShell, white cards with the canonical soft shadow, radius-4 corners, blue accents, avatar circles, pill `refListStatus` cells, specific paddings by role); every screenshot in `create-crud-form/assets/screenshots/` shows exactly what a canonical build ships. **That aesthetic IS the design**, and `shesha-design-system` is NOT invoked on these builds — no theme overlay, no visual audit, no `design-critic`. If your blueprint uses a `list-card` / `capture` / `record-detail` / `inline-card` archetype AND the user's brand is genuinely incompatible with the canonical Shesha look, treat the archetype as non-canonical for this project and route to preference 2 or 3 (form-config with brand overlay).
+
+See [create-crud-form/SKILL.md](../../create-crud-form/SKILL.md) for the CRUD archetype table, [shesha-form-edit/references/archetypes.md](../../shesha-form-edit/references/archetypes.md) for the non-canonical Shesha-form archetypes' shape, [create-custom-component/SKILL.md](../../create-custom-component/SKILL.md) for how to widen the toolbox with a new component, and [create-custom-page/SKILL.md](../../create-custom-page/SKILL.md) for the last-resort React page scaffold.
 
 ## Fidelity tiers — including "there is no design"
 

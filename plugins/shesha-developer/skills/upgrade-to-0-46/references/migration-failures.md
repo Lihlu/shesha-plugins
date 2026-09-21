@@ -104,6 +104,54 @@ VALUES ({version}, GETUTCDATE(), 'M{version} (skipped locally: {reason})');
 - Always write the reason into `Description`. An unexplained row is indistinguishable from a real one later.
 - Raise a ticket. A skipped migration is a database that no longer matches its own history.
 
+## §6a. Renamed framework tables — the migration-number test
+
+The Configuration Items rewrite renames tables, and each one renames at a **specific migration
+number**. So the test is per table, not per repo:
+
+| Table family | Renamed at | Becomes |
+|---|---|---|
+| configuration items / reference lists / form configurations | `20250623120399` | `frwk.*`, snake_case |
+| stored files | `20251024104999` | `frwk.stored_files` |
+
+An app migration numbered **after** the threshold must use the new name; one numbered before it must
+keep the old name, because on a fresh database it runs while the old name still exists.
+
+Sweep every repo after the bump:
+
+```bash
+grep -rl "Frwk_ConfigurationItems\|Frwk_ReferenceLists\|Frwk_StoredFiles" --include=M2*.cs .
+```
+
+then compare each hit's number against the threshold for the table it names.
+
+**Why it hides.** On a database that already applied those migrations they are recorded and never
+re-run, so an existing environment starts perfectly while a fresh database — or one restored from an
+older backup — dies on first boot. **A migration added since the last deployment fails first**,
+having been applied nowhere. One host app was found carrying nine such migrations, all latent.
+
+### Writing the fix
+
+`AddForeignKeyColumn` **cannot name a schema.** Add the column plainly, then create the constraint
+against whichever table the database actually has, resolving the primary-key spelling too rather
+than assuming it:
+
+```csharp
+Alter.Table(TableName).AddColumn("ImportedFileId").AsGuid().Nullable();
+
+if (Schema.Schema("frwk").Table("stored_files").Exists())
+{
+    var pk = Schema.Schema("frwk").Table("stored_files").Column("id").Exists() ? "id" : "Id";
+    Create.ForeignKey($"FK_{TableName}_ImportedFileId_frwk_stored_files")
+        .FromTable(TableName).ForeignColumn("ImportedFileId")
+        .ToTable("stored_files").InSchema("frwk").PrimaryColumn(pk);
+}
+else if (Schema.Table("Frwk_StoredFiles").Exists()) { /* pre-rewrite database */ }
+```
+
+Amend the offending migration in place rather than adding a replacement, so hosts that already
+applied it do not re-run it.
+
 ## §7. Escalating upstream
 
 These are framework defects, not application bugs. When reporting:

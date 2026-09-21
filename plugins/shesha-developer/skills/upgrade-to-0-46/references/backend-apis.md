@@ -103,6 +103,7 @@ The compiler catches it only if the result is used in a type-checked position. T
 | `Shesha.Web.FormsDesigner.Domain` namespace | gone; `NotificationMessage` via `Shesha.Html.Tools.Message` |
 | `protected override void Convert(TextWriter, object)` | log4net widened `PatternConverter.Convert` to `public`; an override cannot narrow |
 | `AsyncHelper.RunSync` | still exists, but needs `using Abp.Threading;` |
+| `CancellationToken.None` inside a job | the 0.46 job base exposes a `CancellationToken` **property**, which shadows the type name — qualify as `System.Threading.CancellationToken.None` |
 
 **Key rules:**
 - Before remapping a removed type, check whether it is actually *used*. `ShaRoleAppointmentEntity` repositories are typically assigned in a constructor and never read — delete rather than substitute.
@@ -119,3 +120,27 @@ comm -23 /tmp/all.txt /tmp/insln.txt
 ```
 
 Test projects are the usual omission. Run them too — a test asserting removed behaviour is a real signal, not noise.
+
+---
+
+## §5. The API root answers 401 instead of redirecting to Swagger
+
+0.46 runs every endpoint through `ObjectPermissionChecker`, including the MVC controllers the
+project template generated, and its `!IsAuthenticated` branch rejects the request before the action
+runs. The framework's own `HomeController` carries `[AllowAnonymous]`; a template copy does not,
+because it never needed it before.
+
+```csharp
+[AllowAnonymous]                       // + using Microsoft.AspNetCore.Authorization;
+public class HomeController : SheshaControllerBase
+```
+
+Two lines. Seen independently in more than one app, so check for it rather than waiting to be told.
+
+## §6. Front-end applications must be registered
+
+A portal or second front end passing `applicationKey="<key>"` to `ShaApplicationProvider` needs a
+matching row in `frwk.front_end_apps`, or form resolution has no registered application to resolve
+against. This is easy to miss because it fails quietly and may have been missing for years —
+`default-app` is often the only registered key. Add it in an app migration, guarded on the key so
+it is safe to re-run.

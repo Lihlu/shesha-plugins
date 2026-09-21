@@ -75,6 +75,24 @@ Sibling packages under `packages/` need the same reactjs bump plus their own API
 - Settings files → `SettingsFormMarkupFactory` with the typed builder
 - Form-builder and ajax helpers that were removed from reactjs now need local equivalents under `src/utils/`
 
+**Stale dev tooling in a workspace blocks the whole install.** npm resolves workspace
+`devDependencies` too, so an unused Storybook / styleguidist / enzyme toolchain pinned to React 18
+stops the app you care about from installing. Before migrating any of it, check: does anything
+import it outside the stories; does a pipeline build it; do the stories reference real components or
+the module template's sample page; do the config aliases name directories that still exist. If it is
+template boilerplate — sample page, story wrapper, story helper — **delete it rather than migrate
+it.** A reliable tell is boilerplate still doing `require('antd/dist/antd.less')`, a file gone since
+antd 4.
+
+**Settings-form specifics**, beyond swapping the builder: ids are generated rather than written out
+and `fbf(tabId)` is what parents a tab's children (so children set no `parentId`); `description` →
+`tooltip`, `values` → `dropdownOptions` (the option type carries no `id`), `items` →
+`buttonGroupOptions`, `hidden` → `visibleJs`; `settingsFormMarkup` and
+`validateConfigurableComponentSettings` take the **factory**, not its result. `settingsInput` has no
+`defaultValue` — move the default into the component (`prop={model?.prop ?? 'post'}`) and say so,
+because it is a real relocation. Check the valid `inputType` union against the installed typings
+rather than guessing; it is long and it changes.
+
 **Key rules:**
 - The root app and each workspace typecheck independently. Root-clean does not imply workspace-clean.
 - `IToolboxComponent` variance and `IConfigurableFormComponent<IStyleValue>` mismatches (e.g. `Border<string|number>` vs `IBorderValue`) are genuine API changes, not oversights — they need per-component work.
@@ -86,3 +104,12 @@ Sibling packages under `packages/` need the same reactjs bump plus their own API
 - `dotnet run` leaves `*.Web.Host.exe` alive after its wrapper exits, holding both `bin/` (MSB3021) and the port. Kill strays before rebuilding.
 - `MSB3021` in a repo with Visual Studio open is almost always a file lock, not a regression. Retry before investigating.
 - npm `file:` specs break on paths containing spaces.
+- `"start": "NODE_ENV=production node server.js"` is POSIX syntax; `cmd` cannot parse it and reports
+  `'NODE_ENV' is not recognized`. Prefix with `cross-env` — and check it is **declared**, not merely
+  present transitively, or it disappears at the next lockfile regeneration.
+- A `pre-commit` hook running lint blocks every commit touching matched files if the lint config
+  imports a plugin that was never a dependency. Check the committed lockfile before blaming the
+  upgrade — it is often long-standing breakage that had not been triggered. Fix the dependency
+  rather than passing `--no-verify`.
+- Hooks that stash and restore the tree can rewrite line endings, turning a two-line change into a
+  whole-file diff. Check real changes with `git diff --ignore-cr-at-eol`.

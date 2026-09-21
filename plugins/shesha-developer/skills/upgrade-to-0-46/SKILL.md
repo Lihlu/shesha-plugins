@@ -14,6 +14,7 @@ A clean build proves almost nothing here. Three of the four failure classes belo
 - **Version drift** resolves silently to the wrong package
 - **Companion packages** compiled against 0.43 fail at *type load*, not compile
 - **Migration failures** only happen when the app first talks to a database
+- **Config-package defects** survive all of the above and are only visible on screen
 
 Budget accordingly: compiling is the early, easy part.
 
@@ -27,6 +28,7 @@ Work in this order. Each phase surfaces problems the previous one was hiding.
 | 2 | Backend code migration | [references/backend-apis.md](references/backend-apis.md) |
 | 3 | Frontend stack + Configuration Studio | [references/frontend-stack.md](references/frontend-stack.md) |
 | 4 | Start-up / migration failures | [references/migration-failures.md](references/migration-failures.md) |
+| 5 | Config packages — layout and data-context breaks | [references/config-packages.md](references/config-packages.md) |
 
 ## Target versions
 
@@ -56,6 +58,8 @@ dotnet restore && python -c "import json;d=json.load(open('obj/project.assets.js
 3. **Backend compiles** — expect a cascade: each fixed project reveals the next one's errors.
 4. **Run the app against a real database.** This is where the upgrade is actually tested.
 5. **Frontend last** — it is independent and rarely blocks the backend.
+6. **Then read the shipped config packages.** Flattened containers and out-of-context `selectedRow`
+   pass every gate above. Phase 5.
 
 ## Do not trust these signals
 
@@ -64,6 +68,8 @@ dotnet restore && python -c "import json;d=json.load(open('obj/project.assets.js
 | `dotnet build` succeeds | Says nothing about type load or migrations |
 | `NU1101 no packages exist with this id` | Usually a *disabled* or unauthenticated source |
 | A migration is in `VersionInfo` | May have been backfilled, never executed |
+| A `.shaconfig` in the repo looks correct | The upgrade writes layout damage to the *database*, not the package |
+| `npm view <pkg> version` | Returns the `latest` dist-tag, not the newest version |
 | Another project "works" | Its packages may only be in the global cache |
 | `column_id` has no gaps | bacpac import renumbers, destroying the evidence |
 
@@ -74,6 +80,8 @@ dotnet restore && python -c "import json;d=json.load(open('obj/project.assets.js
 - [ ] Backend builds, **including projects outside the main .sln**
 - [ ] App starts against an upgraded database and serves an authenticated endpoint
 - [ ] Adminportal typechecks and `/configuration-studio` returns 200
+- [ ] Config packages swept for flattened containers and out-of-context `selectedRow`
+- [ ] Any form fixed in a designer has been re-exported into a new package and committed
 - [ ] Any migration workaround is written down and owned by a ticket
 
 Now perform the upgrade described in: $ARGUMENTS

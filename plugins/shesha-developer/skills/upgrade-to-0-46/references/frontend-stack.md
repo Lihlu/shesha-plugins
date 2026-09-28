@@ -72,7 +72,7 @@ Reference implementation: PR shesha-io/shesha-framework#4905.
 
 Sibling packages under `packages/` need the same reactjs bump plus their own API migration:
 
-- Settings files → `SettingsFormMarkupFactory` with the typed builder
+- Settings files → `SettingsFormMarkupFactory` with the typed builder (see *Component settings files* below)
 - Form-builder and ajax helpers that were removed from reactjs now need local equivalents under `src/utils/`
 
 **Stale dev tooling in a workspace blocks the whole install.** npm resolves workspace
@@ -97,6 +97,33 @@ rather than guessing; it is long and it changes.
 - The root app and each workspace typecheck independently. Root-clean does not imply workspace-clean.
 - `IToolboxComponent` variance and `IConfigurableFormComponent<IStyleValue>` mismatches (e.g. `Border<string|number>` vs `IBorderValue`) are genuine API changes, not oversights — they need per-component work.
 - Fix pre-existing typing bugs you uncover, but list them separately: `IUseMutateResponseFixedEndpoint<T>` with the response in the *input* slot should be `<void, T>`.
+
+### Component settings files
+
+Every designer component's `settings.ts` must be migrated to the 0.46 settings-panel shape — a straight API port of the old builder calls is not enough.
+
+**Rules:**
+- **Tabs are mandatory.** The root of `fbf()` is a single `.addSearchableTabs({ propertyName: 'settingsTabs', parentId: 'root', hideLabel: true, tabs: [...] })`. Every setting lives inside a tab (typically *Common*, *Data*, *Events*, *Appearance*, *Security*) — no settings at the root, no flat lists, no `addSectionSeparator` used as a substitute for tabs.
+- **Inputs use `settingsInput`.** Replace legacy per-type builders (`addTextField`, `addDropdown`, `addCheckbox`, `addCodeEditor`, `addPermissionAutocomplete`, …) with `.addSettingsInput({ inputType: '...', ... })`. Set `jsSetting: true` where the value may be JS-driven.
+- **Group related inputs with `settingsInputRow`.** Put small related inputs side by side via `.addSettingsInputRow({ inputs: [{ type: '...', ... }, ...] })` (e.g. Edit Mode + Hide) instead of stacking them.
+- Each input's `parentId` is its **tab's id**, not `'root'`.
+
+```typescript
+.addSearchableTabs({ id: tabsId, propertyName: 'settingsTabs', parentId: 'root', label: 'Settings', hideLabel: true, tabs: [
+  { key: '1', title: 'Common', id: commonTabId, components: [...fbf()
+    .addSettingsInput({ id: nanoid(), parentId: commonTabId, inputType: 'textField', propertyName: 'label', label: 'Label', jsSetting: true })
+    .addSettingsInputRow({ id: nanoid(), parentId: commonTabId, inputs: [
+      { id: nanoid(), type: 'editModeSelector', propertyName: 'editMode', label: 'Edit Mode' },
+      { id: nanoid(), type: 'switch', propertyName: 'hidden', label: 'Hide', jsSetting: true },
+    ] })
+    .toJson()] },
+  { key: '2', title: 'Security', id: securityTabId, components: [...fbf()
+    .addSettingsInput({ id: nanoid(), parentId: securityTabId, inputType: 'permissions', propertyName: 'permissions', label: 'Permissions', jsSetting: true })
+    .toJson()] },
+] })
+```
+
+Full template: the `create-custom-component` skill (*settings.ts Template (Tabbed)*).
 
 ## §5. Windows gotchas
 

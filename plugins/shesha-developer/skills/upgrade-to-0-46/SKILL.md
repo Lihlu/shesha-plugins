@@ -82,6 +82,7 @@ dotnet restore && python -c "import json;d=json.load(open('obj/project.assets.js
 - [ ] Adminportal typechecks and `/configuration-studio` returns 200
 - [ ] Config packages swept for flattened containers and out-of-context `selectedRow`
 - [ ] Any form fixed in a designer has been re-exported into a new package and committed
+- [ ] Every component `settings.ts` is tabbed (`addSearchableTabs`) and uses `addSettingsInput` / `addSettingsInputRow` (phase 3 §4)
 - [ ] Any migration workaround is written down and owned by a ticket
 
 Now perform the upgrade described in: $ARGUMENTS

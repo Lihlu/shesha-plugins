@@ -68,6 +68,23 @@ Reference implementation: PR shesha-io/shesha-framework#4905.
 
 **Watch for** a malformed backend URL fallback such as `"https:localhost:44362"` — missing `//` after the protocol throws `Invalid URL` rather than falling back.
 
+**Studio layout broken (toolbar squashed into the header, buttons cut off)** — check for a stale
+`antd` 5 **nested under `@shesha-io/reactjs`**:
+
+```bash
+npm ls antd   # look for node_modules/@shesha-io/reactjs/node_modules/antd@5.x
+```
+
+reactjs 0.46 does not depend on antd (it is a dev dependency); the nested copy is left in
+`package-lock.json` from the 0.43 install, where the app itself used antd 5. Node resolves the nearest
+copy, so all Shesha UI renders with antd 5 inside an antd 6 app. `npm install` reports "up to date"
+and never re-resolves it. Delete every `node_modules/@shesha-io/reactjs/node_modules/*` entry from the
+lock, remove that folder, reinstall, and confirm a single antd.
+
+**Designer canvas renders at "0px"** — a stale `shesha:designerWidth` in the browser's localStorage
+(the default is computed from `screen.availWidth`, which can read 0 in an embedded or hidden
+browser). Remove the key and reload; it is per browser, not a code defect.
+
 ## §4. Package workspaces
 
 Sibling packages under `packages/` need the same reactjs bump plus their own API migration:

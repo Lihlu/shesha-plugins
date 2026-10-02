@@ -127,15 +127,41 @@ Test projects are the usual omission. Run them too — a test asserting removed 
 
 0.46 runs every endpoint through `ObjectPermissionChecker`, including the MVC controllers the
 project template generated, and its `!IsAuthenticated` branch rejects the request before the action
-runs. The framework's own `HomeController` carries `[AllowAnonymous]`; a template copy does not,
-because it never needed it before.
+runs. A template `HomeController` has no `[AllowAnonymous]`, because it never needed it before.
+
+Put the attribute on the **`Index` action, not the class**. The authorization check accepts it on
+either the controller type or the method, and the template controller often holds other actions
+(test or diagnostic endpoints) that must stay authenticated — a class-level attribute opens them all.
 
 ```csharp
-[AllowAnonymous]                       // + using Microsoft.AspNetCore.Authorization;
 public class HomeController : SheshaControllerBase
+{
+    [AllowAnonymous]                   // + using Microsoft.AspNetCore.Authorization;
+    public IActionResult Index()
+    {
+        return Redirect("/swagger");
+    }
+}
 ```
 
-Two lines. Seen independently in more than one app, so check for it rather than waiting to be told.
+Seen independently in more than one app, so check for it rather than waiting to be told.
+
+**It hides locally.** A database whose `Shesha.Security` setting has `defaultEndpointAccess = 5`
+(anonymous) lets the root through without the attribute, so the defect only appears on environments
+using the default (authenticated). Do not judge the attribute unnecessary from a local run.
+
+**Swagger switched off outside Development.** Many apps wrap `UseSwagger()` in `IsDevelopment()`,
+while the template `HomeController` still redirects `/` to `/swagger` — so every deployed root lands
+on a bare 404 the browser shows as "page can't be found". 0.46 already handles this, driven by the
+**Swagger UI Enabled** security setting (`SwaggerUiEnabled`, default `true`):
+
+- `return await RedirectToSwaggerOrDefaultAsync(securitySettings);` in the home action redirects
+  when enabled and returns "API is running" when not;
+- `SwaggerUiAccessMiddleware` (registered by the app before `UseSwagger`) answers `/swagger` with 403
+  when disabled.
+
+Moving to it means turning the setting off on environments that must hide Swagger, because the
+default exposes it.
 
 ## §6. Front-end applications must be registered
 

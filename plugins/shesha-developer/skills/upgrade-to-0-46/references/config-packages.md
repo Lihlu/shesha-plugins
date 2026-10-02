@@ -125,6 +125,27 @@ expose the form into a module the app owns, re-apply the customisation on top of
 and ship that as a config package. Otherwise a fresh database renders the framework's version and
 the customisation disappears again.
 
+The same happens to **companion-module** forms an app edited in place on 0.43: the module's package
+import on first boot writes a new revision over them. Find them by their latest revision being an
+import (`creation_method_lkp = 3`) on top of a manual one, then check whether the manual one carried
+app-specific content.
+
+Two prerequisites make the exposed copy actually replace the original:
+
+- **The app module must be the root module.** Overrides are ranked by module level relative to the
+  root, and the root comes from the ABP *startup* module. The template's Web.Host module is a plain
+  `AbpModule`, so the root silently falls back to `Shesha` and every override loses. Make the host
+  module implement `ISheshaSubmodule` with `ModuleType => typeof(<AppModule>)`. Check
+  `SELECT name FROM frwk.modules WHERE is_root_module = 1`.
+- **A package cannot carry the exposure.** `DistributedConfigurableItemBase` has no field for it and
+  the importer never sets `ExposedFrom` / `SurfaceStatus`; only `IConfigurationItemManager.ExposeAsync`
+  (Configuration Studio's Expose) does. Shipped alone, the form arrives as an unrelated form in the
+  app module. Expose it in code before the app's packages import — in the app module's
+  `InitializeConfigurationAsync`, before `ImportConfigurationAsync()` — and **commit that in its own
+  `RequiresNew` unit of work**: the seeder imports each package in a new transaction that otherwise
+  blocks on the uncommitted rows until it times out. The import then finds the item by module + name
+  and only updates its markup, label and description, so the override survives.
+
 ---
 
 ## §5. Shipping the fix
@@ -141,3 +162,37 @@ forms and register it alongside the others.
   you have not checked.
 - One host app can hold 150+ packages and ~850 form entries. Report findings per form entry and per
   package, not as a flat list.
+
+### How the seeder treats a package
+
+- A package is skipped only when an import result exists with the **same resource name and MD5**;
+  embedded packages are only checked when the host assembly changed since the last start.
+- The 0.46 item layout is `Module/form/<name>.json` with `Markup`, `ModelType`, `Access`,
+  `Permissions`, `Id`, `OriginId`, `Name`, `Label`, `ModuleName`, `FolderPath`, `BaseModules`,
+  `ConfigHash`. `Access` above 2 is written to the form's permissioned object — keep a login form at
+  `5` (anonymous) or nobody can reach it.
+- Reading markup out of SQL Server with `sqlcmd` silently drops non-ASCII (emoji in script comments
+  are common). Read through `SqlClient` or the API when building a package or comparing markup.
+
+---
+
+## §6. Breaks only visible at runtime
+
+Found by comparing each page with the 0.43 site, not by any scan above.
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Table shows "No Data" and sends **no** request | permanent filter reads `{{pageContext.x}}` set in `onAfterDataLoad`; 0.46 runs the table query first and does not re-run it | read the source directly, e.g. `{{application.user.personId}}` |
+| Logo fills the container; a background no longer covers the page | image v6 / container v7 migrations default `dimensions` to `width: 100%` / content width and ignore unitless legacy `width: "170"` and size set by a `style` script | set `desktop`/`tablet`/`mobile` `dimensions` explicitly |
+| CSS injected by an HTML Render has no effect (custom chevron tabs, ad-hoc modals) | 0.46 `htmlRender` sanitises output unless `sanitize: false`; a `<style>`-only result is stripped | turn **Sanitize** off on renderers that emit fixed CSS |
+| Login form blank: `Setting with name 'azureAdSettings' not found` | Azure AD moved to `Shesha.MicrosoftAuthentication` (`IsEnabled`, tenant, client, redirect) | read the new setting, in try/catch so the form still loads; the External Sign In action now needs `provider: 'Microsoft'` |
+| Table empty: `Failed to fetch metadata of type … ConfigurationItems.ConfigurationPackageImportResult` | class moved to `Shesha.Domain` | update `entityType` / `modelType` |
+| `Component 'map' not registered` | Enterprise 8 dropped the Leaflet `map` component (only `mapBoundary` remains) | owner decision — no drop-in replacement |
+| Dashboards / report categories empty; `ReferenceList/GetByName` 404 | endpoint removed in 0.46, still called by `@shesha-io/dep` 2.5 and `@shesha-io/devexpressreporting` 4 betas | app-side compatibility endpoint over `IReferenceListHelper` until the packages are fixed |
+| Menu items open "form not found" | Roles, Forms, Reference Lists, Notification Type/Channel, Workflow Definitions and File Templates are edited in Configuration Studio; `shesha/scheduled-job` is `Shesha/scheduled-jobs` | repoint `Shesha.MainMenuSettings` by **target**, not title, in a migration (`Execute.WithConnection` + JSON) |
+
+When querying forms over the API, `FormConfiguration/GetByName` returns 404 on 0.46 — read with
+`FormConfiguration/GetJson?id=` and write with `UpdateMarkup` (or multipart `ImportJson`, which
+overwrites without a revision — back up first). Send `sha-frontend-application: <app key>` on
+reads; without it forms and app-scoped settings resolve against the swagger application and
+report "not found".
